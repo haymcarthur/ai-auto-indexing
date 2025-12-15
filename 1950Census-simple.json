@@ -1,0 +1,457 @@
+{
+  "records": [
+    {
+      "id": "1:2:41FM-WLRW",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-RMGZ",
+          "givenName": "Viola",
+          "surname": "Driggers",
+          "relationship": "Head",
+          "sex": "Female",
+          "age": "41",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": [],
+          "events": [
+            {
+              "type": "Residence",
+              "date": "1940",
+              "place": "Los Angeles, California, United States"
+            }
+          ]
+        },
+        {
+          "id": "1:1:6XG8-RMG8",
+          "givenName": "Donn",
+          "surname": "Driggers",
+          "relationship": "Son",
+          "sex": "Male",
+          "age": "17",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41FM-HK3W",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-RYMB",
+          "givenName": "Edgar J",
+          "surname": "Fadden",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "26",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "PSZS-N4R"
+            }
+          ],
+          "hints": [],
+          "events": [
+            {
+              "type": "Birth",
+              "date": "1924",
+              "place": "Ohio, United States"
+            },
+            {
+              "type": "Residence",
+              "date": "1935",
+              "place": "Cleveland, Ohio, United States"
+            }
+          ]
+        },
+        {
+          "id": "1:1:6XG8-RYM1",
+          "givenName": "Dagle H",
+          "surname": "Fadden",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "21",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "PSZ9-55M"
+            }
+          ],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:HZZ2-YFDQ",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:X78Q-881W",
+          "givenName": "No One at Home",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41X1-BCZZ",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-PYC8",
+          "givenName": "Carroll",
+          "surname": "Morgan",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "24",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "G4MH-KVN"
+            }
+          ],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-PYCD",
+          "givenName": "Maxine",
+          "surname": "Morgan",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "21",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "G4MH-K3W"
+            }
+          ],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41FM-9MV3",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-GGD8",
+          "givenName": "Russell C",
+          "surname": "Whitt",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "30",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-GGD6",
+          "givenName": "Helene F",
+          "surname": "Whitt",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "38",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-GGDD",
+          "givenName": "Cheryl L",
+          "surname": "Whitt",
+          "relationship": "Daughter",
+          "sex": "Female",
+          "age": "3",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-GGDZ",
+          "givenName": "Mary A",
+          "surname": "Haskell",
+          "relationship": "Mother-in-law",
+          "sex": "Female",
+          "age": "65",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41X1-BHV4",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-FKH1",
+          "givenName": "Joel V",
+          "surname": "Day",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "46",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": [],
+          "events": [
+            {
+              "type": "Residence",
+              "date": "1940",
+              "place": "Pasadena, California, United States"
+            },
+            {
+              "type": "Residence",
+              "date": "1945",
+              "place": "Burbank, California, United States"
+            }
+          ]
+        },
+        {
+          "id": "1:1:6XG8-FKHT",
+          "givenName": "Jean E",
+          "surname": "Day",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "32",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-FKHY",
+          "givenName": "Annette G",
+          "surname": "Brandt",
+          "relationship": "Stepdaughter",
+          "sex": "Female",
+          "age": "14",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-FKHB",
+          "givenName": "Joyce",
+          "surname": "Brandt",
+          "relationship": "Stepdaughter",
+          "sex": "Female",
+          "age": "12",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-FKHR",
+          "givenName": "David",
+          "surname": "Brandt",
+          "relationship": "Stepson",
+          "sex": "Male",
+          "age": "8",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41FM-9S75",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-PBGK",
+          "givenName": "C W",
+          "surname": "Lynds",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "48",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-PBG2",
+          "givenName": "D F",
+          "surname": "Lynds",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "46",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-PBGV",
+          "givenName": "Roger C",
+          "surname": "Lynds",
+          "relationship": "Son",
+          "sex": "Male",
+          "age": "21",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41FM-W7ZL",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-P2CQ",
+          "givenName": "Lester C",
+          "surname": "Montgomery",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "43",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "L2J4-QMB"
+            }
+          ],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-P2CS",
+          "givenName": "Charlotte W",
+          "surname": "Montgomery",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "40",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "L2J4-3PW"
+            }
+          ],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-P2C3",
+          "givenName": "Lester C",
+          "surname": "Montgomery",
+          "relationship": "Son",
+          "sex": "Male",
+          "age": "18",
+          "race": "White",
+          "attachedPersons": [
+            {
+              "pid": "L2J4-QMB"
+            }
+          ],
+          "hints": []
+        },
+        {
+          "id": "1:1:6XG8-P2C9",
+          "givenName": "Gary Booth",
+          "surname": "Montgomery",
+          "relationship": "Son",
+          "sex": "Male",
+          "age": "15",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:HZZ2-YTFH",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:X78Q-DQ9S",
+          "givenName": "No one at Home",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:41FM-9MBD",
+      "recordType": "Census",
+      "date": "1950",
+      "place": "Glendale, California, United States",
+      "people": [
+        {
+          "id": "1:1:6XG8-G1PK",
+          "givenName": "Horace Bruce",
+          "surname": "Denton",
+          "relationship": "Head",
+          "sex": "Male",
+          "age": "26",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": [
+            {}
+          ]
+        },
+        {
+          "id": "1:1:6XG8-G1PV",
+          "givenName": "Virginia",
+          "surname": "Denton",
+          "relationship": "Wife",
+          "sex": "Female",
+          "age": "25",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": [
+            {}
+          ]
+        },
+        {
+          "id": "1:1:6XG8-G1P2",
+          "givenName": "Catherine",
+          "surname": "Denton",
+          "relationship": "Daughter",
+          "sex": "Female",
+          "age": "5",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": [
+            {}
+          ]
+        },
+        {
+          "id": "1:1:6XG8-G1PL",
+          "givenName": "Stephen Bruce",
+          "surname": "Denton",
+          "relationship": "Son",
+          "sex": "Male",
+          "age": "3",
+          "race": "White",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    }
+  ]
+}
