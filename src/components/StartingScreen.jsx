@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { FullPageOverlay } from '../../../ux-zion-library/src/components/FullPageOverlay';
-import { ImageViewer } from '../../../ux-zion-library/src/components/ImageViewer';
-import { InfoSheet } from '../../../ux-zion-library/src/components/InfoSheet';
-import { IconButton } from '../../../ux-zion-library/src/components/IconButton';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
-import { DocumentRecordPerson, NoticeInfo } from '../../../ux-zion-library/src/icons';
+import { FullPageOverlay } from "../../ux-zion-library/src/components/FullPageOverlay";
+import { ImageViewer } from "../../ux-zion-library/src/components/ImageViewer";
+import { InfoSheet } from "../../ux-zion-library/src/components/InfoSheet";
+import { IconButton } from "../../ux-zion-library/src/components/IconButton";
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
+import { DocumentRecordPerson, NoticeInfo } from "../../ux-zion-library/src/icons";
 import { NamesInfoSheet } from './NamesInfoSheet';
 import { InstructionPanel } from './InstructionPanel';
 import { useTestSession } from '../contexts/TestSessionContext';
 import { validateTask } from '../utils/taskValidation';
 import censusDataJson from '../../1950Census-simple.json';
-import imageUrl from '../../../ux-zion-library/src/assets/Records/image6.jpg';
+import imageUrl from "../../ux-zion-library/src/assets/Records/image6.jpg";
 
 export const StartingScreen = () => {
   const [showNamesSheet, setShowNamesSheet] = useState(false);

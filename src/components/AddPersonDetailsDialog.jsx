@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import { DialogOverlay } from '../../../ux-zion-library/src/components/DialogOverlay';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
+import { DialogOverlay } from "../../ux-zion-library/src/components/DialogOverlay";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 
 export const AddPersonDetailsDialog = ({
   isOpen,

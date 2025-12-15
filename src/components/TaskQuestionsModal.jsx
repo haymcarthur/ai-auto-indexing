@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
-import { colors } from '../../../ux-zion-library/src/tokens/colors';
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
+import { colors } from "../../ux-zion-library/src/tokens/colors";
 
 /**
  * Modal for collecting task completion feedback

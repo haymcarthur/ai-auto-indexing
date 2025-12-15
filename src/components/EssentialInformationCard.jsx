@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Card } from '../../../ux-zion-library/src/components/Card';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { Divider } from '../../../ux-zion-library/src/components/Divider';
-import { Header } from '../../../ux-zion-library/src/components/Header';
-import { TextField } from '../../../ux-zion-library/src/components/TextField';
-import { Select } from '../../../ux-zion-library/src/components/Select';
-import { Toggle } from '../../../ux-zion-library/src/components/Toggle';
-import { IconButton } from '../../../ux-zion-library/src/components/IconButton';
-import { MenuOverlay, useMenuOverlay } from '../../../ux-zion-library/src/components/MenuOverlay';
-import { Checkbox } from '../../../ux-zion-library/src/components/Checkbox';
-import { DocumentRecordPerson, ContentAdd, ContentDelete } from '../../../ux-zion-library/src/icons';
-import { colors, transparentColors } from '../../../ux-zion-library/src/tokens/colors';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
-import { bold } from '../../../ux-zion-library/src/tokens/typography';
+import { Card } from "../../ux-zion-library/src/components/Card";
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { Divider } from "../../ux-zion-library/src/components/Divider";
+import { Header } from "../../ux-zion-library/src/components/Header";
+import { TextField } from "../../ux-zion-library/src/components/TextField";
+import { Select } from "../../ux-zion-library/src/components/Select";
+import { Toggle } from "../../ux-zion-library/src/components/Toggle";
+import { IconButton } from "../../ux-zion-library/src/components/IconButton";
+import { MenuOverlay, useMenuOverlay } from "../../ux-zion-library/src/components/MenuOverlay";
+import { Checkbox } from "../../ux-zion-library/src/components/Checkbox";
+import { DocumentRecordPerson, ContentAdd, ContentDelete } from "../../ux-zion-library/src/icons";
+import { colors, transparentColors } from "../../ux-zion-library/src/tokens/colors";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
+import { bold } from "../../ux-zion-library/src/tokens/typography";
 
 const NAME_TYPE_OPTIONS = [
   'Also Known As',

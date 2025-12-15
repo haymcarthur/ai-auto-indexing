@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
-import { colors } from '../../../ux-zion-library/src/tokens/colors';
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
+import { colors } from "../../ux-zion-library/src/tokens/colors";
 
 /**
  * Instruction panel component for user testing

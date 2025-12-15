@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { TextField } from '../../../ux-zion-library/src/components/TextField';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { Header } from '../../../ux-zion-library/src/components/Header';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
+import { TextField } from "../../ux-zion-library/src/components/TextField";
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { Header } from "../../ux-zion-library/src/components/Header";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 
 export const AddPersonQuickGlance = ({ fullName, onSave, onCancel }) => {
   // Parse full name into given name and surname

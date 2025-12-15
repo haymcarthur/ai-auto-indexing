@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { InfoSheet } from '../../../ux-zion-library/src/components/InfoSheet';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { Header } from '../../../ux-zion-library/src/components/Header';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
+import { InfoSheet } from "../../ux-zion-library/src/components/InfoSheet";
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { Header } from "../../ux-zion-library/src/components/Header";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
 import { EssentialInformationCard } from './EssentialInformationCard';
 import { RecordGroupCard } from './RecordGroupCard';
 import { EventsCard } from './EventsCard';
@@ -14,8 +14,8 @@ import { PreviousRelationshipsDialog } from './PreviousRelationshipsDialog';
 import { DeleteMemberDialog } from './DeleteMemberDialog';
 import { AddPersonDetailsDialog } from './AddPersonDetailsDialog';
 import { getRecordGroupPeople, getPerson } from '../utils/censusData';
-import { colors } from '../../../ux-zion-library/src/tokens/colors';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
+import { colors } from "../../ux-zion-library/src/tokens/colors";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 
 export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateCensusData, onBack, onClose, onDelete }) => {
   // Use state to track current person, so it can be refreshed after updates

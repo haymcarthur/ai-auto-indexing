@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
-import { Card } from '../../../ux-zion-library/src/components/Card';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { Header } from '../../../ux-zion-library/src/components/Header';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
-import { ListItem } from '../../../ux-zion-library/src/components/ListItem';
-import { Avatar } from '../../../ux-zion-library/src/components/Avatar';
-import { LogoFamilysearch, ContentAttached } from '../../../ux-zion-library/src/icons';
-import { colors } from '../../../ux-zion-library/src/tokens/colors';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
+import { Card } from "../../ux-zion-library/src/components/Card";
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { Header } from "../../ux-zion-library/src/components/Header";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
+import { ListItem } from "../../ux-zion-library/src/components/ListItem";
+import { Avatar } from "../../ux-zion-library/src/components/Avatar";
+import { LogoFamilysearch, ContentAttached } from "../../ux-zion-library/src/icons";
+import { colors } from "../../ux-zion-library/src/tokens/colors";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 
 export const TreeAttachmentCard = ({
   type = 'unattached', // 'hint' | 'unattached' | 'attached'

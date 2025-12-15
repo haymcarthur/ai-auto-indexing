@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { InfoSheet } from '../../../ux-zion-library/src/components/InfoSheet';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { Divider } from '../../../ux-zion-library/src/components/Divider';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
+import { InfoSheet } from "../../ux-zion-library/src/components/InfoSheet";
+import { Button } from "../../ux-zion-library/src/components/Button";
+import { Divider } from "../../ux-zion-library/src/components/Divider";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
 import {
   ContentAttached,
   DocumentRecordPerson,
   ContentDetach,
   MenuFilter,
   ArrowCaret
-} from '../../../ux-zion-library/src/icons';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
-import { transparentColors, buttonColors, colors } from '../../../ux-zion-library/src/tokens/colors';
-import { bold } from '../../../ux-zion-library/src/tokens/typography';
+} from "../../ux-zion-library/src/icons";
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
+import { transparentColors, buttonColors, colors } from "../../ux-zion-library/src/tokens/colors";
+import { bold } from "../../ux-zion-library/src/tokens/typography";
 import { getAllRecordGroups, filterRecordGroups } from '../utils/censusData';
 import { ManageNamesInfoSheet } from './ManageNamesInfoSheet';
 import { ViewNameInfoSheet } from './ViewNameInfoSheet';

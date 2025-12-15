@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { InfoSheet } from '../../../ux-zion-library/src/components/InfoSheet';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
-import { DialogOverlay } from '../../../ux-zion-library/src/components/DialogOverlay';
+import { InfoSheet } from "../../ux-zion-library/src/components/InfoSheet";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
+import { DialogOverlay } from "../../ux-zion-library/src/components/DialogOverlay";
 import { EssentialInformationCard } from './EssentialInformationCard';
 import { RecordGroupCard } from './RecordGroupCard';
 import { EventsCard } from './EventsCard';
 import { AdditionalFactsCard } from './AdditionalFactsCard';
 import { ReviewCard } from './ReviewCard';
 import { PreviousRelationshipsDialog } from './PreviousRelationshipsDialog';
-import { spacing } from '../../../ux-zion-library/src/tokens/spacing';
-import { colors } from '../../../ux-zion-library/src/tokens/colors';
+import { spacing } from "../../ux-zion-library/src/tokens/spacing";
+import { colors } from "../../ux-zion-library/src/tokens/colors";
 
 export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData, onUpdateCensusData, preselectedRecordGroup }) => {
   const [cardStates, setCardStates] = useState({
