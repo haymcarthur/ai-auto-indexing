@@ -139,6 +139,8 @@ export const NamesInfoSheet = ({ censusData, onUpdateCensusData, onClose }) => {
             {group.people.map((person, personIndex) => {
               const { Icon, bg, color } = getIconAndColor(person.attachmentStatus);
 
+              const isPrimary = person.relationship === 'Primary';
+
               return (
                 <div
                   key={person.id}
@@ -148,11 +150,12 @@ export const NamesInfoSheet = ({ censusData, onUpdateCensusData, onClose }) => {
                     padding: '12px',
                     cursor: 'pointer',
                     borderRadius: '6px',
-                    transition: 'background-color 0.2s'
+                    transition: 'background-color 0.2s',
+                    backgroundColor: isPrimary ? transparentColors.transparentGray05 : 'transparent'
                   }}
                   onClick={() => setSelectedPerson(person)}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = transparentColors.transparentGray05}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isPrimary ? transparentColors.transparentGray05 : 'transparent'}
                 >
                   {/* Icon with background */}
                   <div style={{
@@ -176,10 +179,10 @@ export const NamesInfoSheet = ({ censusData, onUpdateCensusData, onClose }) => {
                       color: '#6b7280',
                       marginBottom: '1px'
                     }}>
-                      {person.relationship}
+                      {isPrimary ? 'Primary' : person.relationship}
                     </div>
                     <div style={{
-                      ...(person.relationship === 'Primary' ? bold.b : { fontSize: '14px', fontWeight: 500 }),
+                      ...(isPrimary ? bold.b : { fontSize: '14px', fontWeight: 500 }),
                       color: '#111827',
                       marginBottom: '1px'
                     }}>
