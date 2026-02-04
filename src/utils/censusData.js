@@ -32,7 +32,8 @@ export const getPerson = (censusData, personId) => {
         race: person.race,
         attachmentStatus: hasPersonId ? 'attached' : hasHint ? 'hint' : 'none',
         attachedPid: person.attachedPersons?.[0]?.pid || null,
-        events: person.events || []
+        events: person.events || [],
+        relationships: person.relationships || []
       };
     }
   }
@@ -74,7 +75,8 @@ export const getRecordGroupPeople = (censusData, recordId) => {
       age: person.age,
       race: person.race,
       attachmentStatus: hasPersonId ? 'attached' : hasHint ? 'hint' : 'none',
-      attachedPid: person.attachedPersons?.[0]?.pid || null
+      attachedPid: person.attachedPersons?.[0]?.pid || null,
+      relationships: person.relationships || []
     };
   });
 };
@@ -145,7 +147,8 @@ export const getAllRecordGroupsUnfiltered = (censusData) => {
         race: person.race,
         attachmentStatus: hasPersonId ? 'attached' : hasHint ? 'hint' : 'none',
         attachedPid: person.attachedPersons?.[0]?.pid || null,
-        events: person.events || []
+        events: person.events || [],
+        relationships: person.relationships || []
       };
     });
 
