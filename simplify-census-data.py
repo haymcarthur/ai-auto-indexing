@@ -8,6 +8,38 @@ into a simplified format matching the structure used in the index-creation test.
 
 import json
 
+# Relationship type mappings
+RELATIONSHIP_ROLES = {
+    'PARENT_CHILD': {
+        'FIRST': 'PARENT',
+        'SECOND': 'CHILD'
+    },
+    'GRAND_PARENT': {
+        'FIRST': 'GRANDPARENT',
+        'SECOND': 'GRANDCHILD'
+    },
+    'PARENT_CHILD_IN_LAW': {
+        'FIRST': 'PARENT_IN_LAW',
+        'SECOND': 'CHILD_IN_LAW'
+    },
+    'COUPLE': {
+        'FIRST': 'SPOUSE',
+        'SECOND': 'SPOUSE'
+    },
+    'SIBLING': {
+        'FIRST': 'SIBLING',
+        'SECOND': 'SIBLING'
+    },
+    'SIBLING_IN_LAW': {
+        'FIRST': 'SIBLING_IN_LAW',
+        'SECOND': 'SIBLING_IN_LAW'
+    },
+    'AUNT_OR_UNCLE': {
+        'FIRST': 'AUNT_OR_UNCLE',
+        'SECOND': 'NIECE_OR_NEPHEW'
+    }
+}
+
 def load_complex_json(filepath):
     """Load the complex JSON file"""
     print(f"Loading {filepath}...")
@@ -122,6 +154,7 @@ def build_person(person_elem, element_map):
         "sex": sex,
         "age": age,
         "race": race,
+        "relationships": [],
         "attachedPersons": [],
         "hints": []
     }
@@ -131,6 +164,131 @@ def build_person(person_elem, element_map):
         person["occupation"] = occupation
 
     return person
+
+def extract_person_relationships(person_id, all_relationships, person_map):
+    """
+    Extract all relationships for a specific person.
+
+    Args:
+        person_id: ID of the person
+        all_relationships: List of all RELATIONSHIP elements
+        person_map: Dict mapping person ID -> person object (with name)
+
+    Returns:
+        List of relationship dicts for this person
+    """
+    relationships = []
+
+    for rel_elem in all_relationships:
+        super_elems = rel_elem.get('superElements', [])
+        if len(super_elems) != 2:
+            continue
+
+        rel_type = rel_elem.get('relType')
+        if not rel_type:
+            continue
+
+        # Check if this person is involved in this relationship
+        person_index = None
+        person_order = None
+        other_person_id = None
+        other_person_order = None
+
+        for idx, super_elem in enumerate(super_elems):
+            if super_elem.get('id') == person_id:
+                person_index = idx
+                person_order = super_elem.get('order')
+                # Get the other person
+                other_idx = 1 - idx
+                other_person_id = super_elems[other_idx].get('id')
+                other_person_order = super_elems[other_idx].get('order')
+                break
+
+        if person_index is None:
+            continue  # This relationship doesn't involve this person
+
+        # Get role for this person
+        role_map = RELATIONSHIP_ROLES.get(rel_type, {})
+        role = role_map.get(person_order, rel_type)
+
+        # Get related person info
+        related_person = person_map.get(other_person_id)
+        if not related_person:
+            continue
+
+        related_name = f"{related_person.get('givenName', '')} {related_person.get('surname', '')}".strip()
+        if not related_name:
+            related_name = "Unknown"
+
+        relationships.append({
+            "type": rel_type,
+            "role": role,
+            "relatedPersonId": other_person_id,
+            "relatedPersonName": related_name
+        })
+
+    return relationships
+
+def build_relationship_graph(all_relationships, person_map):
+    """
+    Build top-level relationship graph for the record.
+
+    Args:
+        all_relationships: List of all RELATIONSHIP elements
+        person_map: Dict mapping person ID -> person object
+
+    Returns:
+        List of relationship objects with both persons and roles
+    """
+    graph = []
+
+    for rel_elem in all_relationships:
+        super_elems = rel_elem.get('superElements', [])
+        if len(super_elems) != 2:
+            continue
+
+        rel_type = rel_elem.get('relType')
+        rel_id = rel_elem.get('id')
+        if not rel_type:
+            continue
+
+        person1_id = super_elems[0].get('id')
+        person1_order = super_elems[0].get('order')
+        person2_id = super_elems[1].get('id')
+        person2_order = super_elems[1].get('order')
+
+        # Get person info
+        person1 = person_map.get(person1_id)
+        person2 = person_map.get(person2_id)
+
+        if not person1 or not person2:
+            continue
+
+        # Get roles
+        role_map = RELATIONSHIP_ROLES.get(rel_type, {})
+        person1_role = role_map.get(person1_order, rel_type)
+        person2_role = role_map.get(person2_order, rel_type)
+
+        # Build names
+        person1_name = f"{person1.get('givenName', '')} {person1.get('surname', '')}".strip()
+        person2_name = f"{person2.get('givenName', '')} {person2.get('surname', '')}".strip()
+
+        graph.append({
+            "id": rel_id,
+            "type": rel_type,
+            "person1": {
+                "id": person1_id,
+                "name": person1_name or "Unknown",
+                "role": person1_role
+            },
+            "person2": {
+                "id": person2_id,
+                "name": person2_name or "Unknown",
+                "role": person2_role
+            }
+        })
+
+    return graph
 
 def build_record(record_elem, element_map):
     """Build simplified record object from RECORD element"""
@@ -143,6 +301,33 @@ def build_record(record_elem, element_map):
         person_elem = element_map.get(pid)
         if person_elem and person_elem.get('elementType') == 'PERSON':
             people.append(build_person(person_elem, element_map))
+
+    # Create person map for relationship lookups
+    person_map = {p['id']: p for p in people}
+
+    # Find all RELATIONSHIP elements for this record
+    all_relationships = []
+    for pid in person_ids:
+        person_elem = element_map.get(pid)
+        if person_elem:
+            # Get all descendant elements including relationships
+            descendants = get_all_descendant_elements(pid, element_map)
+            for desc in descendants:
+                if desc.get('elementType') == 'RELATIONSHIP':
+                    # Avoid duplicates
+                    if desc not in all_relationships:
+                        all_relationships.append(desc)
+
+    # Extract relationships for each person
+    for person in people:
+        person['relationships'] = extract_person_relationships(
+            person['id'],
+            all_relationships,
+            person_map
+        )
+
+    # Build relationship graph
+    relationship_graph = build_relationship_graph(all_relationships, person_map)
 
     # Extract record-level fields
     date = ""
@@ -198,7 +383,8 @@ def build_record(record_elem, element_map):
         "recordType": event_type,
         "date": date,
         "place": place,
-        "people": people
+        "people": people,
+        "relationshipGraph": relationship_graph
     }
 
 def extract_document_metadata(elements):
