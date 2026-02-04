@@ -1,0 +1,278 @@
+{
+  "records": [
+    {
+      "id": "1:2:HZ28-PRHV",
+      "recordType": "Census",
+      "date": "",
+      "place": "",
+      "people": [
+        {
+          "id": "1:1:X7YY-NPRG",
+          "givenName": "Reamy",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "24",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-L4QZ",
+          "givenName": "John",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "31",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-2TSX",
+          "givenName": "Joseph",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "8",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-NPRB",
+          "givenName": "George",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "6",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-2TSF",
+          "givenName": "Christopher",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "4",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-2TS6",
+          "givenName": "Isaic",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "10",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:HZ28-5BVV",
+      "recordType": "Census",
+      "date": "",
+      "place": "",
+      "people": [
+        {
+          "id": "1:1:X7YY-L4QH",
+          "givenName": "John",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:HZ2D-MQ7R",
+      "recordType": "Census",
+      "date": "",
+      "place": "",
+      "people": [
+        {
+          "id": "1:1:X7YY-YYWV",
+          "givenName": "Marion",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "19",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-B92V",
+          "givenName": "John",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "28",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-R2VS",
+          "givenName": "Absolom",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "26",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-R2V3",
+          "givenName": "Mollie",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "1",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-TD5Y",
+          "givenName": "Charles",
+          "surname": "Guthrea",
+          "relationship": "",
+          "sex": "",
+          "age": "",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-B92N",
+          "givenName": "John D",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "60",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-TD5R",
+          "givenName": "Maggie",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "24",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-B92J",
+          "givenName": "Julia",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "19",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    },
+    {
+      "id": "1:2:HZ2D-MXW5",
+      "recordType": "Census",
+      "date": "",
+      "place": "",
+      "people": [
+        {
+          "id": "1:1:X7YY-YYWX",
+          "givenName": "Ida Susan",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "9",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-B923",
+          "givenName": "Kitty",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "41",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-R2JY",
+          "givenName": "Emmorin",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-TD5K",
+          "givenName": "Luella",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "12",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-B92S",
+          "givenName": "George",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "34",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-TD5L",
+          "givenName": "John",
+          "surname": "",
+          "relationship": "",
+          "sex": "",
+          "age": "1",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        },
+        {
+          "id": "1:1:X7YY-B92Z",
+          "givenName": "Thompson",
+          "surname": "Ockerman",
+          "relationship": "",
+          "sex": "",
+          "age": "10",
+          "race": "",
+          "attachedPersons": [],
+          "hints": []
+        }
+      ]
+    }
+  ]
+}

@@ -11,8 +11,8 @@ import { NamesInfoSheet } from './NamesInfoSheet';
 import { InstructionPanel } from './InstructionPanel';
 import { useTestSession } from '../contexts/TestSessionContext';
 import { validateTask } from '../utils/taskValidation';
-import censusDataJson from '../../1950Census-simple.json';
-import imageUrl from "../../ux-zion-library/src/assets/Records/image6.jpg";
+import censusDataJson from '../../KentuckyCensus-simple.json';
+import imageUrl from "../../ux-zion-library/src/assets/Records/KentuckyCensusRecords.jpg";
 
 export const StartingScreen = () => {
   const [showNamesSheet, setShowNamesSheet] = useState(false);
@@ -35,7 +35,7 @@ export const StartingScreen = () => {
   // Prepare images array for ImageViewer
   const images = [{
     src: imageUrl,
-    alt: '1950 Census Record - Glendale'
+    alt: 'Kentucky Census Records'
   }];
 
   // Secondary buttons (low-emphasis with labels and icons)
