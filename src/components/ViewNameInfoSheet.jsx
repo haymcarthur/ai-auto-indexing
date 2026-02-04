@@ -749,10 +749,27 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
       : 'Census';
 
     // Build members array (all people except the current person)
-    // Show inverse relationships from the current person's perspective
+    // Use the relationships array to find direct relationships
     const members = allPeople
       .filter(p => p.id !== person.id)
       .map(p => {
+        // Check if there's a relationship defined in the current person's relationships array
+        if (person.relationships && person.relationships.length > 0) {
+          const rel = person.relationships.find(r => r.relatedPersonId === p.id);
+          if (rel) {
+            // Capitalize the role for display
+            const displayRole = rel.role.split('_').map(word =>
+              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+
+            return {
+              relationship: displayRole,
+              name: p.fullName
+            };
+          }
+        }
+
+        // Fallback to old logic if relationships array doesn't exist or relationship not found
         // If viewing the Primary person, show everyone's relationships as-is
         if (person.relationship === 'Primary' || person.relationship === 'Head') {
           return {
