@@ -12,6 +12,7 @@ import { useTestSession } from '../contexts/TestSessionContext';
  * @param {boolean} props.isRecording - Whether recording is active
  * @param {string} props.recordingError - Error message from recording
  * @param {Function} props.startRecording - Function to start recording
+ * @param {number} props.currentTask - Current task number (1 or 2)
  */
 export function InstructionPanel({
   onRecordingStart,
@@ -19,20 +20,55 @@ export function InstructionPanel({
   isRecording,
   recordingError,
   startRecording,
-  recordingStopped
+  recordingStopped,
+  currentTask = 1
 }) {
   const { isSubmitting } = useTestSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [isOpen, setIsOpen] = useState(true);
   const [recordingAttempted, setRecordingAttempted] = useState(false);
   const [hasStartedTask, setHasStartedTask] = useState(false);
+  const [taskOrder] = useState(() => Math.random() < 0.5 ? ['Prompt', 'Highlight'] : ['Highlight', 'Prompt']);
   const [responses, setResponses] = useState({
-    taskSuccess: null,
-    difficulty: null,
-    confusing: '',
-    workedWell: ''
+    task1Success: null,
+    task1Difficulty: null,
+    task2Success: null,
+    task2Difficulty: null,
+    preferredMethod: null,
+    overallFeedback: ''
   });
   const [errors, setErrors] = useState({});
+  // Store all collected responses to submit at the end
+  const [collectedResponses, setCollectedResponses] = useState({
+    task1: null,
+    task2: null,
+    final: null
+  });
+
+  // Auto-advance to Task 1 after recording enabled
+  useEffect(() => {
+    if (isRecording && currentStep === 0) {
+      setCurrentStep(1);
+    }
+  }, [isRecording, currentStep]);
+
+  // Reset panel when task changes
+  useEffect(() => {
+    if (currentTask === 2) {
+      // Reset to Task 2 instructions (step 4)
+      setCurrentStep(4);
+      setIsOpen(true);
+      setHasStartedTask(false);
+      setErrors({});
+    }
+  }, [currentTask]);
+
+  // Force panel open when recording stops
+  useEffect(() => {
+    if (recordingStopped) {
+      setIsOpen(true);
+    }
+  }, [recordingStopped]);
 
   // Handle recording start
   const handleStartRecording = async () => {
@@ -57,7 +93,12 @@ export function InstructionPanel({
   // Handle moving to questions
   const handleStartQuestions = () => {
     setIsOpen(true);
-    setCurrentStep(2); // Move to first question
+    // Move to appropriate question based on current task
+    if (currentStep === 1) {
+      setCurrentStep(2); // Task 1 Q1
+    } else if (currentStep === 4) {
+      setCurrentStep(5); // Task 2 Q1
+    }
   };
 
   // Handle next question
@@ -72,14 +113,18 @@ export function InstructionPanel({
 
     // Validate current question
     const newErrors = {};
-    if (step === 2 && responses.taskSuccess === null) {
-      newErrors.taskSuccess = 'Please select an option';
-    } else if (step === 3 && responses.difficulty === null) {
-      newErrors.difficulty = 'Please select a difficulty rating';
-    } else if (step === 4 && responses.confusing.trim() === '') {
-      newErrors.confusing = 'Please provide a response';
-    } else if (step === 5 && responses.workedWell.trim() === '') {
-      newErrors.workedWell = 'Please provide a response';
+    if (step === 2 && responses.task1Success === null) {
+      newErrors.task1Success = 'Please select an option';
+    } else if (step === 3 && responses.task1Difficulty === null) {
+      newErrors.task1Difficulty = 'Please select a difficulty rating';
+    } else if (step === 5 && responses.task2Success === null) {
+      newErrors.task2Success = 'Please select an option';
+    } else if (step === 6 && responses.task2Difficulty === null) {
+      newErrors.task2Difficulty = 'Please select a difficulty rating';
+    } else if (step === 7 && responses.preferredMethod === null) {
+      newErrors.preferredMethod = 'Please select a method';
+    } else if (step === 8 && responses.overallFeedback.trim() === '') {
+      newErrors.overallFeedback = 'Please provide a response';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -87,33 +132,73 @@ export function InstructionPanel({
       return;
     }
 
-    // If on last question, submit
-    if (step === 5) {
-      const formattedResponses = [
+    // If on Task 1 Q2 (step 3), store Task 1 responses and notify parent
+    if (step === 3) {
+      const task1Responses = [
         {
-          questionId: 'task-success',
+          questionId: `task1-${taskOrder[0].toLowerCase()}-success`,
           questionText: 'Did you complete the task successfully?',
-          answer: responses.taskSuccess
+          answer: responses.task1Success,
+          method: taskOrder[0]
         },
         {
-          questionId: 'difficulty-rating',
+          questionId: `task1-${taskOrder[0].toLowerCase()}-difficulty`,
           questionText: 'How difficult was this task?',
-          answer: responses.difficulty.toString()
-        },
-        {
-          questionId: 'most-confusing',
-          questionText: 'What was most confusing or difficult?',
-          answer: responses.confusing
-        },
-        {
-          questionId: 'what-worked-well',
-          questionText: 'What worked well?',
-          answer: responses.workedWell
+          answer: responses.task1Difficulty.toString(),
+          method: taskOrder[0]
         }
       ];
 
+      // Store Task 1 responses for later submission
+      setCollectedResponses(prev => ({ ...prev, task1: task1Responses }));
+
+      // Notify parent to switch to Task 2 (but don't submit data yet)
       if (onTaskComplete) {
-        onTaskComplete(formattedResponses);
+        onTaskComplete(task1Responses, false); // false = don't save yet
+      }
+      return;
+    }
+
+    // If on last final question (step 8), submit ALL responses (Task 1, Task 2, and final questions)
+    if (step === 8) {
+      const task2Responses = [
+        {
+          questionId: `task2-${taskOrder[1].toLowerCase()}-success`,
+          questionText: 'Did you complete the task successfully?',
+          answer: responses.task2Success,
+          method: taskOrder[1]
+        },
+        {
+          questionId: `task2-${taskOrder[1].toLowerCase()}-difficulty`,
+          questionText: 'How difficult was this task?',
+          answer: responses.task2Difficulty.toString(),
+          method: taskOrder[1]
+        }
+      ];
+
+      const finalResponses = [
+        {
+          questionId: 'preferred-method',
+          questionText: 'Which method did you prefer?',
+          answer: responses.preferredMethod
+        },
+        {
+          questionId: 'overall-feedback',
+          questionText: 'What would you change about this experience overall?',
+          answer: responses.overallFeedback
+        }
+      ];
+
+      // Submit ALL responses together: Task 1, Task 2, and final questions
+      const allResponses = {
+        task1: collectedResponses.task1,
+        task2: task2Responses,
+        final: finalResponses,
+        taskOrder: taskOrder // Include task order for reference
+      };
+
+      if (onTaskComplete) {
+        onTaskComplete(allResponses, true); // true = save now
       }
     } else {
       // Move to next question
@@ -135,12 +220,13 @@ export function InstructionPanel({
   }, [isRecording, onRecordingStart]);
 
   const steps = [
+    // Step 0: Introduction
     {
       title: 'Welcome to the Index Creation Study',
       content: (
         <div>
           <p style={{ marginBottom: spacing.xs }}>
-            Thank you for participating in this study. We're testing a new feature for creating indexes in historical records.
+            Thank you for participating in this study. You will be testing two different methods that use AI to help you index names on a historical document.
           </p>
           <div style={{
             padding: spacing.sm,
@@ -156,9 +242,6 @@ export function InstructionPanel({
               You must enable screen and audio recording to participate. Click the button below to grant permission.
             </p>
           </div>
-          <p style={{ marginBottom: spacing.xs, fontSize: '14px', color: colors.gray.gray60 }}>
-            Your recording helps us understand how you interact with the interface. All data will be kept confidential and used only for research purposes.
-          </p>
           {recordingError && (
             <div style={{
               padding: spacing.xs,
@@ -193,28 +276,20 @@ export function InstructionPanel({
                 Enable Screen Recording
               </Button>
             )}
-            {isRecording && (
-              <Button
-                variant="blue"
-                emphasis="high"
-                onClick={() => setCurrentStep(1)}
-              >
-                Continue
-              </Button>
-            )}
           </div>
         </div>
       )
     },
+    // Step 1: Task 1 Instructions
     {
-      title: 'Your Task',
+      title: `${taskOrder[0]} Method`,
       content: (
         <div>
           <p style={{ marginBottom: spacing.sm }}>
-            <strong>Task:</strong> Add <strong>Gary Fadden</strong> and <strong>Ronald Fadden</strong> to <strong>Edgar Fadden's household</strong>.
+            You have found your ancestor "John Ockerman" on this Kentucky Census Record along with 3 other John Ockermans. Your ancestor is married to Reamy and has 4 children. Your task is to use this method to index John along with his wife and 4 children.
           </p>
           <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray70 }}>
-            Make sure to include <strong>all details</strong> found on the document for each person (name, relationship, age, birth information, etc.).
+            While there is AI that can assist with this task, the AI can get the information wrong so make sure you double check all of the details to make sure they are captured correctly.
           </p>
           <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray60 }}>
             <strong>Tip:</strong> You can reopen this panel at any time by clicking the tab on the left side.
@@ -222,8 +297,9 @@ export function InstructionPanel({
         </div>
       )
     },
+    // Step 2: Task 1 Question 1
     {
-      title: 'Question 1 of 4',
+      title: 'Task 1 - Question 1 of 2',
       content: (
         <div>
           <label style={{
@@ -248,34 +324,35 @@ export function InstructionPanel({
                   alignItems: 'center',
                   gap: spacing.xxs,
                   padding: spacing.xs,
-                  border: `1px solid ${responses.taskSuccess === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
+                  border: `1px solid ${responses.task1Success === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  backgroundColor: responses.taskSuccess === option.value ? colors.blue.blue00 : 'transparent'
+                  backgroundColor: responses.task1Success === option.value ? colors.blue.blue00 : 'transparent'
                 }}
               >
                 <input
                   type="radio"
-                  name="taskSuccess"
+                  name="task1Success"
                   value={option.value}
-                  checked={responses.taskSuccess === option.value}
-                  onChange={(e) => updateResponse('taskSuccess', e.target.value)}
+                  checked={responses.task1Success === option.value}
+                  onChange={(e) => updateResponse('task1Success', e.target.value)}
                   style={{ cursor: 'pointer' }}
                 />
                 <span>{option.label}</span>
               </label>
             ))}
           </div>
-          {errors.taskSuccess && (
+          {errors.task1Success && (
             <p style={{ color: colors.red.red60, fontSize: '13px', marginTop: spacing.xxs }}>
-              {errors.taskSuccess}
+              {errors.task1Success}
             </p>
           )}
         </div>
       )
     },
+    // Step 3: Task 1 Question 2
     {
-      title: 'Question 2 of 4',
+      title: 'Task 1 - Question 2 of 2',
       content: (
         <div>
           <label style={{
@@ -297,13 +374,13 @@ export function InstructionPanel({
             ].map(option => (
               <button
                 key={option.value}
-                onClick={() => updateResponse('difficulty', option.value)}
+                onClick={() => updateResponse('task1Difficulty', option.value)}
                 style={{
                   width: '100%',
                   padding: spacing.sm,
-                  border: `2px solid ${responses.difficulty === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
+                  border: `2px solid ${responses.task1Difficulty === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
                   borderRadius: '4px',
-                  backgroundColor: responses.difficulty === option.value ? colors.blue.blue00 : colors.gray.gray00,
+                  backgroundColor: responses.task1Difficulty === option.value ? colors.blue.blue00 : colors.gray.gray00,
                   cursor: 'pointer',
                   fontSize: '15px',
                   fontWeight: 500,
@@ -315,16 +392,34 @@ export function InstructionPanel({
               </button>
             ))}
           </div>
-          {errors.difficulty && (
+          {errors.task1Difficulty && (
             <p style={{ color: colors.red.red60, fontSize: '13px', marginTop: spacing.xxs }}>
-              {errors.difficulty}
+              {errors.task1Difficulty}
             </p>
           )}
         </div>
       )
     },
+    // Step 4: Task 2 Instructions
     {
-      title: 'Question 3 of 4',
+      title: `${taskOrder[1]} Method`,
+      content: (
+        <div>
+          <p style={{ marginBottom: spacing.sm }}>
+            You have found your ancestor "John Ockerman" on this Kentucky Census Record along with 3 other John Ockermans. Your ancestor is married to Reamy and has 4 children. Your task is to use this method to index John along with his wife and 4 children.
+          </p>
+          <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray70 }}>
+            While there is AI that can assist with this task, the AI can get the information wrong so make sure you double check all of the details to make sure they are captured correctly.
+          </p>
+          <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray60 }}>
+            <strong>Tip:</strong> You can reopen this panel at any time by clicking the tab on the left side.
+          </p>
+        </div>
+      )
+    },
+    // Step 5: Task 2 Question 1
+    {
+      title: 'Task 2 - Question 1 of 2',
       content: (
         <div>
           <label style={{
@@ -333,34 +428,51 @@ export function InstructionPanel({
             fontWeight: 600,
             fontSize: '15px'
           }}>
-            What was most confusing or difficult?
+            Did you complete the task successfully?
             <span style={{ color: colors.red.red60 }}>*</span>
           </label>
-          <textarea
-            value={responses.confusing}
-            onChange={(e) => updateResponse('confusing', e.target.value)}
-            placeholder="Please describe any confusing or difficult aspects..."
-            style={{
-              width: '100%',
-              minHeight: '120px',
-              padding: spacing.xs,
-              border: `1px solid ${errors.confusing ? colors.red.red60 : colors.gray.gray10}`,
-              borderRadius: '4px',
-              fontSize: '14px',
-              fontFamily: 'inherit',
-              resize: 'vertical'
-            }}
-          />
-          {errors.confusing && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xxs }}>
+            {[
+              { value: 'yes', label: 'Yes, I completed it' },
+              { value: 'partially', label: 'Partially' },
+              { value: 'no', label: 'No, I did not complete it' }
+            ].map(option => (
+              <label
+                key={option.value}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.xxs,
+                  padding: spacing.xs,
+                  border: `1px solid ${responses.task2Success === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  backgroundColor: responses.task2Success === option.value ? colors.blue.blue00 : 'transparent'
+                }}
+              >
+                <input
+                  type="radio"
+                  name="task2Success"
+                  value={option.value}
+                  checked={responses.task2Success === option.value}
+                  onChange={(e) => updateResponse('task2Success', e.target.value)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+          {errors.task2Success && (
             <p style={{ color: colors.red.red60, fontSize: '13px', marginTop: spacing.xxs }}>
-              {errors.confusing}
+              {errors.task2Success}
             </p>
           )}
         </div>
       )
     },
+    // Step 6: Task 2 Question 2
     {
-      title: 'Question 4 of 4',
+      title: 'Task 2 - Question 2 of 2',
       content: (
         <div>
           <label style={{
@@ -369,27 +481,129 @@ export function InstructionPanel({
             fontWeight: 600,
             fontSize: '15px'
           }}>
-            What worked well?
+            How difficult was this task?
+            <span style={{ color: colors.red.red60 }}>*</span>
+          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
+            {[
+              { value: 1, label: 'Very difficult' },
+              { value: 2, label: 'Difficult' },
+              { value: 3, label: 'Medium' },
+              { value: 4, label: 'Easy' },
+              { value: 5, label: 'Very easy' }
+            ].map(option => (
+              <button
+                key={option.value}
+                onClick={() => updateResponse('task2Difficulty', option.value)}
+                style={{
+                  width: '100%',
+                  padding: spacing.sm,
+                  border: `2px solid ${responses.task2Difficulty === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
+                  borderRadius: '4px',
+                  backgroundColor: responses.task2Difficulty === option.value ? colors.blue.blue00 : colors.gray.gray00,
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  textAlign: 'left'
+                }}
+              >
+                {option.value}. {option.label}
+              </button>
+            ))}
+          </div>
+          {errors.task2Difficulty && (
+            <p style={{ color: colors.red.red60, fontSize: '13px', marginTop: spacing.xxs }}>
+              {errors.task2Difficulty}
+            </p>
+          )}
+        </div>
+      )
+    },
+    // Step 7: Final Question 1
+    {
+      title: 'Final Questions - 1 of 2',
+      content: (
+        <div>
+          <label style={{
+            display: 'block',
+            marginBottom: spacing.xs,
+            fontWeight: 600,
+            fontSize: '15px'
+          }}>
+            Which method did you prefer?
+            <span style={{ color: colors.red.red60 }}>*</span>
+          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xxs }}>
+            {[
+              { value: taskOrder[0], label: `${taskOrder[0]} Method` },
+              { value: taskOrder[1], label: `${taskOrder[1]} Method` }
+            ].map(option => (
+              <label
+                key={option.value}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.xxs,
+                  padding: spacing.xs,
+                  border: `1px solid ${responses.preferredMethod === option.value ? colors.blue.blue60 : colors.gray.gray10}`,
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  backgroundColor: responses.preferredMethod === option.value ? colors.blue.blue00 : 'transparent'
+                }}
+              >
+                <input
+                  type="radio"
+                  name="preferredMethod"
+                  value={option.value}
+                  checked={responses.preferredMethod === option.value}
+                  onChange={(e) => updateResponse('preferredMethod', e.target.value)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+          {errors.preferredMethod && (
+            <p style={{ color: colors.red.red60, fontSize: '13px', marginTop: spacing.xxs }}>
+              {errors.preferredMethod}
+            </p>
+          )}
+        </div>
+      )
+    },
+    // Step 8: Final Question 2
+    {
+      title: 'Final Questions - 2 of 2',
+      content: (
+        <div>
+          <label style={{
+            display: 'block',
+            marginBottom: spacing.xs,
+            fontWeight: 600,
+            fontSize: '15px'
+          }}>
+            What would you change about this experience overall?
             <span style={{ color: colors.red.red60 }}>*</span>
           </label>
           <textarea
-            value={responses.workedWell}
-            onChange={(e) => updateResponse('workedWell', e.target.value)}
-            placeholder="Please describe what worked well..."
+            value={responses.overallFeedback}
+            onChange={(e) => updateResponse('overallFeedback', e.target.value)}
+            placeholder="Please share any feedback about your overall experience..."
             style={{
               width: '100%',
               minHeight: '120px',
               padding: spacing.xs,
-              border: `1px solid ${errors.workedWell ? colors.red.red60 : colors.gray.gray10}`,
+              border: `1px solid ${errors.overallFeedback ? colors.red.red60 : colors.gray.gray10}`,
               borderRadius: '4px',
               fontSize: '14px',
               fontFamily: 'inherit',
               resize: 'vertical'
             }}
           />
-          {errors.workedWell && (
+          {errors.overallFeedback && (
             <p style={{ color: colors.red.red60, fontSize: '13px', marginTop: spacing.xxs }}>
-              {errors.workedWell}
+              {errors.overallFeedback}
             </p>
           )}
         </div>
@@ -399,6 +613,20 @@ export function InstructionPanel({
 
   return (
     <>
+      {/* Scrim overlay - renders first so z-index stacking works correctly */}
+      {(currentStep === 0 || ((currentStep === 1 || currentStep === 4) && !hasStartedTask) || recordingStopped) && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9999,
+          pointerEvents: recordingStopped ? 'auto' : 'none'
+        }} />
+      )}
+
       {/* Tab when panel is closed */}
       {!isOpen && currentStep >= 1 && (
         <div
@@ -408,7 +636,7 @@ export function InstructionPanel({
             top: '50%',
             left: 0,
             transform: 'translateY(-50%)',
-            zIndex: 1000,
+            zIndex: 10000,
             cursor: 'pointer',
             backgroundColor: colors.blue.blue60,
             color: 'white',
@@ -445,7 +673,7 @@ export function InstructionPanel({
           backgroundColor: colors.gray.gray00,
           borderRight: `1px solid ${colors.gray.gray10}`,
           boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
-          zIndex: 1000,
+          zIndex: 10000,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
@@ -519,31 +747,31 @@ export function InstructionPanel({
                 gap: spacing.xs
               }}>
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: spacing.xxs,
-                  padding: `${spacing.xxs} ${spacing.xs}`,
-                  backgroundColor: colors.yellow.yellow60,
-                  color: 'white',
+                  padding: spacing.xs,
+                  marginBottom: spacing.xs,
+                  backgroundColor: 'transparent',
+                  border: `2px solid ${colors.yellow.yellow60}`,
                   borderRadius: '4px',
-                  fontSize: '12px',
-                  fontWeight: 600
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: colors.gray.gray70,
+                  textAlign: 'center'
                 }}>
-                  ⚠ Recording stopped - Click below to reshare
+                  ⚠️ Recording stopped - Please restart to continue
                 </div>
                 <Button
                   variant="blue"
                   emphasis="high"
+                  fullWidth
                   onClick={handleStartRecording}
-                  style={{ width: '100%' }}
                 >
                   Restart Screen Recording
                 </Button>
               </div>
             )}
 
-            {/* Action buttons */}
-            {currentStep === 1 && (
+            {/* Action buttons for Task Instructions (steps 1 and 4) */}
+            {(currentStep === 1 || currentStep === 4) && !recordingStopped && (
               <div style={{
                 padding: spacing.md,
                 paddingBottom: 0,
@@ -551,46 +779,33 @@ export function InstructionPanel({
                 flexDirection: 'column',
                 gap: spacing.xs
               }}>
-                {(!isRecording || recordingStopped) && (
-                  <div style={{
-                    padding: spacing.xs,
-                    marginBottom: spacing.xs,
-                    backgroundColor: colors.yellow.yellow00,
-                    border: `2px solid ${colors.yellow.yellow60}`,
-                    borderRadius: '4px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: colors.gray.gray70,
-                    textAlign: 'center'
-                  }}>
-                    {recordingStopped ? '⚠️ Recording stopped - Please restart to continue' : '⚠️ Please enable recording to begin'}
-                  </div>
-                )}
-                <Button
-                  variant="blue"
-                  emphasis="medium"
-                  size="lg"
-                  fullWidth
-                  onClick={handleStartTask}
-                  disabled={!isRecording || recordingStopped}
-                >
-                  {hasStartedTask ? 'Continue Task' : 'Get Started'}
-                </Button>
                 <Button
                   variant="blue"
                   emphasis="high"
                   size="lg"
                   fullWidth
-                  onClick={handleStartQuestions}
-                  disabled={!isRecording || recordingStopped}
+                  onClick={handleStartTask}
+                  disabled={!isRecording}
                 >
-                  I'm Done
+                  {hasStartedTask ? 'Continue Task' : 'Get Started'}
                 </Button>
+                {hasStartedTask && (
+                  <Button
+                    variant="blue"
+                    emphasis="medium"
+                    size="lg"
+                    fullWidth
+                    onClick={handleStartQuestions}
+                    disabled={!isRecording}
+                  >
+                    I'm Done
+                  </Button>
+                )}
               </div>
             )}
 
             {/* Question buttons */}
-            {currentStep >= 2 && currentStep <= 5 && (
+            {(currentStep === 2 || currentStep === 3 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8) && !recordingStopped && (
               <div style={{
                 padding: spacing.md,
                 paddingBottom: 0,
@@ -598,28 +813,13 @@ export function InstructionPanel({
                 flexDirection: 'column',
                 gap: spacing.xs
               }}>
-                {(!isRecording || recordingStopped) && (
-                  <div style={{
-                    padding: spacing.xs,
-                    marginBottom: spacing.xs,
-                    backgroundColor: colors.red.red00,
-                    border: `2px solid ${colors.red.red60}`,
-                    borderRadius: '4px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: colors.red.red70,
-                    textAlign: 'center'
-                  }}>
-                    ⚠️ Recording stopped - Go back to restart recording
-                  </div>
-                )}
                 <Button
                   variant="blue"
                   emphasis="high"
                   size="lg"
                   fullWidth
                   onClick={handleNextQuestion}
-                  disabled={isSubmitting || !isRecording || recordingStopped}
+                  disabled={isSubmitting || !isRecording}
                 >
                   {isSubmitting ? (
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: spacing.xs }}>
@@ -634,13 +834,13 @@ export function InstructionPanel({
                       Submitting...
                     </span>
                   ) : (
-                    currentStep === 5 ? 'Submit Feedback' : 'Next'
+                    currentStep === 8 ? 'Submit Feedback' : 'Next'
                   )}
                 </Button>
               </div>
             )}
 
-            {/* Progress indicator - 5 circles for Task + 4 Questions */}
+            {/* Progress indicator - 8 dots for steps 1-8 */}
             {currentStep >= 1 && (
               <div style={{
                 padding: spacing.sm,
@@ -648,7 +848,7 @@ export function InstructionPanel({
                 justifyContent: 'center',
                 gap: spacing.xxs
               }}>
-                {[1, 2, 3, 4, 5].map((stepNum) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((stepNum) => (
                   <div
                     key={stepNum}
                     style={{

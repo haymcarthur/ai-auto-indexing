@@ -8,12 +8,14 @@
       "people": [
         {
           "id": "1:1:X7YY-NPRG",
-          "givenName": "Reamy",
-          "surname": "Ockerman",
+          "givenName": "Heamy",
+          "surname": "",
           "relationship": "Spouse",
           "sex": "",
           "age": "24",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
             {
               "type": "COUPLE",
@@ -25,25 +27,19 @@
               "type": "PARENT_CHILD",
               "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-NPRB",
-              "relatedPersonName": "George Ockerman"
+              "relatedPersonName": "George"
             },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-2TS6",
-              "relatedPersonName": "Isaic Ockerman"
+              "relatedPersonName": "Isaic"
             },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-2TSX",
-              "relatedPersonName": "Joseph Ockerman"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-2TSF",
-              "relatedPersonName": "Christopher Ockerman"
+              "relatedPersonName": "Joseph"
             }
           ],
           "attachedPersons": [],
@@ -55,38 +51,38 @@
           "surname": "Ockerman",
           "relationship": "Child",
           "sex": "",
-          "age": "31",
+          "age": "37",
           "race": "",
+          "birthDate": "1819",
+          "birthPlace": "Ohio, United States",
+          "deathDate": "1863",
+          "deathPlace": "Nashville, Tennessee, United States",
+          "isPrimary": true,
+          "isVisible": false,
           "relationships": [
             {
               "type": "COUPLE",
               "role": "SPOUSE",
               "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Reamy Ockerman"
+              "relatedPersonName": "Heamy"
             },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-NPRB",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-2TS6",
-              "relatedPersonName": "Isaic Ockerman"
+              "relatedPersonName": "George"
             },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-2TSX",
-              "relatedPersonName": "Joseph Ockerman"
+              "relatedPersonName": "Joseph"
             },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-2TSF",
-              "relatedPersonName": "Christopher Ockerman"
+              "relatedPersonId": "1:1:X7YY-2TS6",
+              "relatedPersonName": "Isaic"
             }
           ],
           "attachedPersons": [],
@@ -95,12 +91,20 @@
         {
           "id": "1:1:X7YY-2TSX",
           "givenName": "Joseph",
-          "surname": "Ockerman",
+          "surname": "",
           "relationship": "Child",
           "sex": "",
-          "age": "8",
+          "age": "6",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-NPRG",
+              "relatedPersonName": "Heamy"
+            },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
@@ -108,28 +112,16 @@
               "relatedPersonName": "John Ockerman"
             },
             {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Reamy Ockerman"
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-2TS6",
+              "relatedPersonName": "Isaic"
             },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-NPRB",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TS6",
-              "relatedPersonName": "Isaic Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TSF",
-              "relatedPersonName": "Christopher Ockerman"
+              "relatedPersonName": "George"
             }
           ],
           "attachedPersons": [],
@@ -138,12 +130,20 @@
         {
           "id": "1:1:X7YY-NPRB",
           "givenName": "George",
-          "surname": "Ockerman",
+          "surname": "",
           "relationship": "Child",
           "sex": "",
           "age": "6",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-NPRG",
+              "relatedPersonName": "Heamy"
+            },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
@@ -151,71 +151,16 @@
               "relatedPersonName": "John Ockerman"
             },
             {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Reamy Ockerman"
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-2TSX",
+              "relatedPersonName": "Joseph"
             },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-2TS6",
-              "relatedPersonName": "Isaic Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TSX",
-              "relatedPersonName": "Joseph Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TSF",
-              "relatedPersonName": "Christopher Ockerman"
-            }
-          ],
-          "attachedPersons": [],
-          "hints": []
-        },
-        {
-          "id": "1:1:X7YY-2TSF",
-          "givenName": "Christopher",
-          "surname": "Ockerman",
-          "relationship": "Sibling",
-          "sex": "",
-          "age": "4",
-          "race": "",
-          "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-L4QZ",
-              "relatedPersonName": "John Ockerman"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Reamy Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-NPRB",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TS6",
-              "relatedPersonName": "Isaic Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TSX",
-              "relatedPersonName": "Joseph Ockerman"
+              "relatedPersonName": "Isaic"
             }
           ],
           "attachedPersons": [],
@@ -224,12 +169,20 @@
         {
           "id": "1:1:X7YY-2TS6",
           "givenName": "Isaic",
-          "surname": "Ockerman",
+          "surname": "",
           "relationship": "Child",
           "sex": "",
           "age": "10",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-NPRG",
+              "relatedPersonName": "Heamy"
+            },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
@@ -237,28 +190,16 @@
               "relatedPersonName": "John Ockerman"
             },
             {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Reamy Ockerman"
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-2TSX",
+              "relatedPersonName": "Joseph"
             },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-NPRB",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TSX",
-              "relatedPersonName": "Joseph Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-2TSF",
-              "relatedPersonName": "Christopher Ockerman"
+              "relatedPersonName": "George"
             }
           ],
           "attachedPersons": [],
@@ -276,7 +217,7 @@
           },
           "person2": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Reamy Ockerman",
+            "name": "Heamy",
             "role": "SPOUSE"
           }
         },
@@ -285,26 +226,12 @@
           "type": "PARENT_CHILD",
           "person1": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Reamy Ockerman",
+            "name": "Heamy",
             "role": "PARENT"
           },
           "person2": {
             "id": "1:1:X7YY-NPRB",
-            "name": "George Ockerman",
-            "role": "CHILD"
-          }
-        },
-        {
-          "id": "a5d51ac3-090f-4f93-a55d-dc2a44d7bd0c",
-          "type": "PARENT_CHILD",
-          "person1": {
-            "id": "1:1:X7YY-NPRG",
-            "name": "Reamy Ockerman",
-            "role": "PARENT"
-          },
-          "person2": {
-            "id": "1:1:X7YY-2TSF",
-            "name": "Christopher Ockerman",
+            "name": "George",
             "role": "CHILD"
           }
         },
@@ -313,12 +240,12 @@
           "type": "PARENT_CHILD",
           "person1": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Reamy Ockerman",
+            "name": "Heamy",
             "role": "PARENT"
           },
           "person2": {
             "id": "1:1:X7YY-2TS6",
-            "name": "Isaic Ockerman",
+            "name": "Isaic",
             "role": "CHILD"
           }
         },
@@ -327,26 +254,12 @@
           "type": "PARENT_CHILD",
           "person1": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Reamy Ockerman",
+            "name": "Heamy",
             "role": "PARENT"
           },
           "person2": {
             "id": "1:1:X7YY-2TSX",
-            "name": "Joseph Ockerman",
-            "role": "CHILD"
-          }
-        },
-        {
-          "id": "0902553a-58ba-48aa-aa24-b3b1f3716a8d",
-          "type": "PARENT_CHILD",
-          "person1": {
-            "id": "1:1:X7YY-L4QZ",
-            "name": "John Ockerman",
-            "role": "PARENT"
-          },
-          "person2": {
-            "id": "1:1:X7YY-2TSF",
-            "name": "Christopher Ockerman",
+            "name": "Joseph",
             "role": "CHILD"
           }
         },
@@ -360,7 +273,7 @@
           },
           "person2": {
             "id": "1:1:X7YY-NPRB",
-            "name": "George Ockerman",
+            "name": "George",
             "role": "CHILD"
           }
         },
@@ -374,7 +287,7 @@
           },
           "person2": {
             "id": "1:1:X7YY-2TSX",
-            "name": "Joseph Ockerman",
+            "name": "Joseph",
             "role": "CHILD"
           }
         },
@@ -388,7 +301,7 @@
           },
           "person2": {
             "id": "1:1:X7YY-2TS6",
-            "name": "Isaic Ockerman",
+            "name": "Isaic",
             "role": "CHILD"
           }
         },
@@ -397,26 +310,12 @@
           "type": "SIBLING",
           "person1": {
             "id": "1:1:X7YY-2TSX",
-            "name": "Joseph Ockerman",
+            "name": "Joseph",
             "role": "SIBLING"
           },
           "person2": {
             "id": "1:1:X7YY-2TS6",
-            "name": "Isaic Ockerman",
-            "role": "SIBLING"
-          }
-        },
-        {
-          "id": "323ef422-080c-492a-8bc5-c42d1cf6fc42",
-          "type": "SIBLING",
-          "person1": {
-            "id": "1:1:X7YY-2TSX",
-            "name": "Joseph Ockerman",
-            "role": "SIBLING"
-          },
-          "person2": {
-            "id": "1:1:X7YY-2TSF",
-            "name": "Christopher Ockerman",
+            "name": "Isaic",
             "role": "SIBLING"
           }
         },
@@ -425,12 +324,12 @@
           "type": "SIBLING",
           "person1": {
             "id": "1:1:X7YY-2TSX",
-            "name": "Joseph Ockerman",
+            "name": "Joseph",
             "role": "SIBLING"
           },
           "person2": {
             "id": "1:1:X7YY-NPRB",
-            "name": "George Ockerman",
+            "name": "George",
             "role": "SIBLING"
           }
         },
@@ -439,40 +338,12 @@
           "type": "SIBLING",
           "person1": {
             "id": "1:1:X7YY-NPRB",
-            "name": "George Ockerman",
+            "name": "George",
             "role": "SIBLING"
           },
           "person2": {
             "id": "1:1:X7YY-2TS6",
-            "name": "Isaic Ockerman",
-            "role": "SIBLING"
-          }
-        },
-        {
-          "id": "08988d16-cab1-4042-a3a4-90a952567f72",
-          "type": "SIBLING",
-          "person1": {
-            "id": "1:1:X7YY-NPRB",
-            "name": "George Ockerman",
-            "role": "SIBLING"
-          },
-          "person2": {
-            "id": "1:1:X7YY-2TSF",
-            "name": "Christopher Ockerman",
-            "role": "SIBLING"
-          }
-        },
-        {
-          "id": "5d5a0294-f494-4e89-8377-4462a13fd8f8",
-          "type": "SIBLING",
-          "person1": {
-            "id": "1:1:X7YY-2TSF",
-            "name": "Christopher Ockerman",
-            "role": "SIBLING"
-          },
-          "person2": {
-            "id": "1:1:X7YY-2TS6",
-            "name": "Isaic Ockerman",
+            "name": "Isaic",
             "role": "SIBLING"
           }
         }
@@ -492,6 +363,8 @@
           "sex": "",
           "age": "",
           "race": "",
+          "isPrimary": true,
+          "isVisible": false,
           "relationships": [],
           "attachedPersons": [],
           "hints": []
@@ -513,18 +386,20 @@
           "sex": "",
           "age": "19",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
             {
               "type": "SIBLING_IN_LAW",
               "role": "SIBLING_IN_LAW",
               "relatedPersonId": "1:1:X7YY-TD5Y",
               "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "COUPLE",
+              "role": "SPOUSE",
+              "relatedPersonId": "1:1:X7YY-TD5R",
+              "relatedPersonName": "Maggie"
             },
             {
               "type": "SIBLING",
@@ -533,10 +408,16 @@
               "relatedPersonName": "Julia"
             },
             {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-B92V",
-              "relatedPersonName": "John"
+              "type": "PARENT_CHILD",
+              "role": "PARENT",
+              "relatedPersonId": "1:1:X7YY-R2V3",
+              "relatedPersonName": "Mollie"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
             },
             {
               "type": "SIBLING",
@@ -545,16 +426,10 @@
               "relatedPersonName": "Absolom"
             },
             {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-R2V3",
-              "relatedPersonName": "Mollie"
-            },
-            {
-              "type": "COUPLE",
-              "role": "SPOUSE",
-              "relatedPersonId": "1:1:X7YY-TD5R",
-              "relatedPersonName": "Maggie"
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-B92V",
+              "relatedPersonName": "John"
             }
           ],
           "attachedPersons": [],
@@ -568,36 +443,14 @@
           "sex": "",
           "age": "28",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
-            {
-              "type": "SIBLING_IN_LAW",
-              "role": "SIBLING_IN_LAW",
-              "relatedPersonId": "1:1:X7YY-TD5Y",
-              "relatedPersonName": "Charles Guthrea"
-            },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-YYWV",
               "relatedPersonName": "Marion"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-B92J",
-              "relatedPersonName": "Julia"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-R2VS",
-              "relatedPersonName": "Absolom"
             },
             {
               "type": "AUNT_OR_UNCLE",
@@ -608,8 +461,32 @@
             {
               "type": "SIBLING_IN_LAW",
               "role": "SIBLING_IN_LAW",
+              "relatedPersonId": "1:1:X7YY-TD5Y",
+              "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
+            },
+            {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-B92J",
+              "relatedPersonName": "Julia"
+            },
+            {
+              "type": "SIBLING_IN_LAW",
+              "role": "SIBLING_IN_LAW",
               "relatedPersonId": "1:1:X7YY-TD5R",
               "relatedPersonName": "Maggie"
+            },
+            {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-R2VS",
+              "relatedPersonName": "Absolom"
             }
           ],
           "attachedPersons": [],
@@ -623,13 +500,9 @@
           "sex": "",
           "age": "26",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
             {
               "type": "SIBLING",
               "role": "SIBLING",
@@ -639,20 +512,14 @@
             {
               "type": "SIBLING",
               "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-B92J",
-              "relatedPersonName": "Julia"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-B92V",
               "relatedPersonName": "John"
             },
             {
-              "type": "AUNT_OR_UNCLE",
-              "role": "AUNT_OR_UNCLE",
-              "relatedPersonId": "1:1:X7YY-R2V3",
-              "relatedPersonName": "Mollie"
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
             },
             {
               "type": "SIBLING_IN_LAW",
@@ -661,10 +528,22 @@
               "relatedPersonName": "Maggie"
             },
             {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-B92J",
+              "relatedPersonName": "Julia"
+            },
+            {
               "type": "SIBLING_IN_LAW",
               "role": "SIBLING_IN_LAW",
               "relatedPersonId": "1:1:X7YY-TD5Y",
               "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "AUNT_OR_UNCLE",
+              "role": "AUNT_OR_UNCLE",
+              "relatedPersonId": "1:1:X7YY-R2V3",
+              "relatedPersonName": "Mollie"
             }
           ],
           "attachedPersons": [],
@@ -678,24 +557,14 @@
           "sex": "",
           "age": "1",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "GRAND_PARENT",
-              "role": "GRANDCHILD",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
               "relatedPersonId": "1:1:X7YY-YYWV",
               "relatedPersonName": "Marion"
-            },
-            {
-              "type": "AUNT_OR_UNCLE",
-              "role": "NIECE_OR_NEPHEW",
-              "relatedPersonId": "1:1:X7YY-B92J",
-              "relatedPersonName": "Julia"
             },
             {
               "type": "AUNT_OR_UNCLE",
@@ -710,16 +579,28 @@
               "relatedPersonName": "Absolom"
             },
             {
+              "type": "AUNT_OR_UNCLE",
+              "role": "AUNT_OR_UNCLE",
+              "relatedPersonId": "1:1:X7YY-TD5Y",
+              "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "AUNT_OR_UNCLE",
+              "role": "NIECE_OR_NEPHEW",
+              "relatedPersonId": "1:1:X7YY-B92J",
+              "relatedPersonName": "Julia"
+            },
+            {
               "type": "PARENT_CHILD",
               "role": "CHILD",
               "relatedPersonId": "1:1:X7YY-TD5R",
               "relatedPersonName": "Maggie"
             },
             {
-              "type": "AUNT_OR_UNCLE",
-              "role": "NIECE_OR_NEPHEW",
-              "relatedPersonId": "1:1:X7YY-TD5Y",
-              "relatedPersonName": "Charles Guthrea"
+              "type": "GRAND_PARENT",
+              "role": "GRANDCHILD",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
             }
           ],
           "attachedPersons": [],
@@ -733,24 +614,14 @@
           "sex": "",
           "age": "",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD_IN_LAW",
-              "role": "CHILD_IN_LAW",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
             {
               "type": "SIBLING_IN_LAW",
               "role": "SIBLING_IN_LAW",
               "relatedPersonId": "1:1:X7YY-YYWV",
               "relatedPersonName": "Marion"
-            },
-            {
-              "type": "COUPLE",
-              "role": "SPOUSE",
-              "relatedPersonId": "1:1:X7YY-B92J",
-              "relatedPersonName": "Julia"
             },
             {
               "type": "SIBLING_IN_LAW",
@@ -766,15 +637,27 @@
             },
             {
               "type": "AUNT_OR_UNCLE",
-              "role": "AUNT_OR_UNCLE",
+              "role": "NIECE_OR_NEPHEW",
               "relatedPersonId": "1:1:X7YY-R2V3",
               "relatedPersonName": "Mollie"
+            },
+            {
+              "type": "PARENT_CHILD_IN_LAW",
+              "role": "CHILD_IN_LAW",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
             },
             {
               "type": "SIBLING_IN_LAW",
               "role": "SIBLING_IN_LAW",
               "relatedPersonId": "1:1:X7YY-TD5R",
               "relatedPersonName": "Maggie"
+            },
+            {
+              "type": "COUPLE",
+              "role": "SPOUSE",
+              "relatedPersonId": "1:1:X7YY-B92J",
+              "relatedPersonName": "Julia"
             }
           ],
           "attachedPersons": [],
@@ -788,13 +671,9 @@
           "sex": "",
           "age": "60",
           "race": "",
+          "isPrimary": true,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-R2VS",
-              "relatedPersonName": "Absolom"
-            },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
@@ -804,14 +683,14 @@
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-B92J",
-              "relatedPersonName": "Julia"
+              "relatedPersonId": "1:1:X7YY-B92V",
+              "relatedPersonName": "John"
             },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-B92V",
-              "relatedPersonName": "John"
+              "relatedPersonId": "1:1:X7YY-R2VS",
+              "relatedPersonName": "Absolom"
             },
             {
               "type": "GRAND_PARENT",
@@ -822,14 +701,20 @@
             {
               "type": "PARENT_CHILD_IN_LAW",
               "role": "PARENT_IN_LAW",
-              "relatedPersonId": "1:1:X7YY-TD5R",
-              "relatedPersonName": "Maggie"
+              "relatedPersonId": "1:1:X7YY-TD5Y",
+              "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "PARENT",
+              "relatedPersonId": "1:1:X7YY-B92J",
+              "relatedPersonName": "Julia"
             },
             {
               "type": "PARENT_CHILD_IN_LAW",
               "role": "PARENT_IN_LAW",
-              "relatedPersonId": "1:1:X7YY-TD5Y",
-              "relatedPersonName": "Charles Guthrea"
+              "relatedPersonId": "1:1:X7YY-TD5R",
+              "relatedPersonName": "Maggie"
             }
           ],
           "attachedPersons": [],
@@ -843,24 +728,14 @@
           "sex": "",
           "age": "24",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD_IN_LAW",
-              "role": "CHILD_IN_LAW",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
             {
               "type": "COUPLE",
               "role": "SPOUSE",
               "relatedPersonId": "1:1:X7YY-YYWV",
               "relatedPersonName": "Marion"
-            },
-            {
-              "type": "SIBLING_IN_LAW",
-              "role": "SIBLING_IN_LAW",
-              "relatedPersonId": "1:1:X7YY-B92J",
-              "relatedPersonName": "Julia"
             },
             {
               "type": "SIBLING_IN_LAW",
@@ -885,6 +760,18 @@
               "role": "SIBLING_IN_LAW",
               "relatedPersonId": "1:1:X7YY-TD5Y",
               "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "PARENT_CHILD_IN_LAW",
+              "role": "CHILD_IN_LAW",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
+            },
+            {
+              "type": "SIBLING_IN_LAW",
+              "role": "SIBLING_IN_LAW",
+              "relatedPersonId": "1:1:X7YY-B92J",
+              "relatedPersonName": "Julia"
             }
           ],
           "attachedPersons": [],
@@ -898,19 +785,9 @@
           "sex": "",
           "age": "19",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92N",
-              "relatedPersonName": "John D Ockerman"
-            },
-            {
-              "type": "COUPLE",
-              "role": "SPOUSE",
-              "relatedPersonId": "1:1:X7YY-TD5Y",
-              "relatedPersonName": "Charles Guthrea"
-            },
             {
               "type": "SIBLING",
               "role": "SIBLING",
@@ -934,6 +811,18 @@
               "role": "AUNT_OR_UNCLE",
               "relatedPersonId": "1:1:X7YY-R2V3",
               "relatedPersonName": "Mollie"
+            },
+            {
+              "type": "COUPLE",
+              "role": "SPOUSE",
+              "relatedPersonId": "1:1:X7YY-TD5Y",
+              "relatedPersonName": "Charles Guthrea"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B92N",
+              "relatedPersonName": "John D Ockerman"
             },
             {
               "type": "SIBLING_IN_LAW",
@@ -1355,30 +1244,14 @@
           "sex": "",
           "age": "9",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92S",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-TD5K",
-              "relatedPersonName": "Luella"
-            },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-TD5L",
               "relatedPersonName": "John"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-R2JY",
-              "relatedPersonName": "Emmorin"
             },
             {
               "type": "SIBLING",
@@ -1391,6 +1264,18 @@
               "role": "CHILD",
               "relatedPersonId": "1:1:X7YY-B923",
               "relatedPersonName": "Kitty"
+            },
+            {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-TD5K",
+              "relatedPersonName": "Luella"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B92S",
+              "relatedPersonName": "George Ockerman"
             }
           ],
           "attachedPersons": [],
@@ -1404,25 +1289,9 @@
           "sex": "",
           "age": "41",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "COUPLE",
-              "role": "SPOUSE",
-              "relatedPersonId": "1:1:X7YY-B92S",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-TD5K",
-              "relatedPersonName": "Luella"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-TD5L",
-              "relatedPersonName": "John"
-            },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
@@ -1438,8 +1307,26 @@
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
+              "relatedPersonId": "1:1:X7YY-TD5K",
+              "relatedPersonName": "Luella"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-R2JY",
               "relatedPersonName": "Emmorin"
+            },
+            {
+              "type": "COUPLE",
+              "role": "SPOUSE",
+              "relatedPersonId": "1:1:X7YY-B92S",
+              "relatedPersonName": "George Ockerman"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "PARENT",
+              "relatedPersonId": "1:1:X7YY-TD5L",
+              "relatedPersonName": "John"
             }
           ],
           "attachedPersons": [],
@@ -1453,7 +1340,21 @@
           "sex": "",
           "age": "",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B923",
+              "relatedPersonName": "Kitty"
+            },
+            {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-TD5L",
+              "relatedPersonName": "John"
+            },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
@@ -1463,32 +1364,14 @@
             {
               "type": "SIBLING",
               "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-TD5K",
-              "relatedPersonName": "Luella"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-TD5L",
-              "relatedPersonName": "John"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-YYWX",
-              "relatedPersonName": "Ida Susan"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-B92Z",
               "relatedPersonName": "Thompson Ockerman"
             },
             {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B923",
-              "relatedPersonName": "Kitty"
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-TD5K",
+              "relatedPersonName": "Luella"
             }
           ],
           "attachedPersons": [],
@@ -1502,18 +1385,32 @@
           "sex": "",
           "age": "12",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
+            {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-YYWX",
+              "relatedPersonName": "Ida Susan"
+            },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92S",
-              "relatedPersonName": "George Ockerman"
+              "relatedPersonId": "1:1:X7YY-B923",
+              "relatedPersonName": "Kitty"
             },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-R2JY",
               "relatedPersonName": "Emmorin"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B92S",
+              "relatedPersonName": "George Ockerman"
             },
             {
               "type": "SIBLING",
@@ -1524,20 +1421,8 @@
             {
               "type": "SIBLING",
               "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-YYWX",
-              "relatedPersonName": "Ida Susan"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-B92Z",
               "relatedPersonName": "Thompson Ockerman"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B923",
-              "relatedPersonName": "Kitty"
             }
           ],
           "attachedPersons": [],
@@ -1551,7 +1436,21 @@
           "sex": "",
           "age": "34",
           "race": "",
+          "isPrimary": true,
+          "isVisible": false,
           "relationships": [
+            {
+              "type": "PARENT_CHILD",
+              "role": "PARENT",
+              "relatedPersonId": "1:1:X7YY-YYWX",
+              "relatedPersonName": "Ida Susan"
+            },
+            {
+              "type": "COUPLE",
+              "role": "SPOUSE",
+              "relatedPersonId": "1:1:X7YY-B923",
+              "relatedPersonName": "Kitty"
+            },
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
@@ -1567,26 +1466,14 @@
             {
               "type": "PARENT_CHILD",
               "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-TD5L",
-              "relatedPersonName": "John"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
-              "relatedPersonId": "1:1:X7YY-YYWX",
-              "relatedPersonName": "Ida Susan"
-            },
-            {
-              "type": "PARENT_CHILD",
-              "role": "PARENT",
               "relatedPersonId": "1:1:X7YY-B92Z",
               "relatedPersonName": "Thompson Ockerman"
             },
             {
-              "type": "COUPLE",
-              "role": "SPOUSE",
-              "relatedPersonId": "1:1:X7YY-B923",
-              "relatedPersonName": "Kitty"
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-TD5L",
+              "relatedPersonName": "John"
             }
           ],
           "attachedPersons": [],
@@ -1600,18 +1487,20 @@
           "sex": "",
           "age": "1",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92S",
-              "relatedPersonName": "George Ockerman"
-            },
             {
               "type": "SIBLING",
               "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-TD5K",
-              "relatedPersonName": "Luella"
+              "relatedPersonId": "1:1:X7YY-YYWX",
+              "relatedPersonName": "Ida Susan"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B923",
+              "relatedPersonName": "Kitty"
             },
             {
               "type": "SIBLING",
@@ -1622,20 +1511,20 @@
             {
               "type": "SIBLING",
               "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-YYWX",
-              "relatedPersonName": "Ida Susan"
+              "relatedPersonId": "1:1:X7YY-TD5K",
+              "relatedPersonName": "Luella"
             },
             {
               "type": "SIBLING",
               "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-B92Z",
-              "relatedPersonName": "Thompson Ockerman"
+              "relatedPersonId": "1:1:X7YY-B92S",
+              "relatedPersonName": "George Ockerman"
             },
             {
               "type": "PARENT_CHILD",
               "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B923",
-              "relatedPersonName": "Kitty"
+              "relatedPersonId": "1:1:X7YY-B92Z",
+              "relatedPersonName": "Thompson Ockerman"
             }
           ],
           "attachedPersons": [],
@@ -1649,30 +1538,20 @@
           "sex": "",
           "age": "10",
           "race": "",
+          "isPrimary": false,
+          "isVisible": false,
           "relationships": [
-            {
-              "type": "PARENT_CHILD",
-              "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B92S",
-              "relatedPersonName": "George Ockerman"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-TD5K",
-              "relatedPersonName": "Luella"
-            },
-            {
-              "type": "SIBLING",
-              "role": "SIBLING",
-              "relatedPersonId": "1:1:X7YY-TD5L",
-              "relatedPersonName": "John"
-            },
             {
               "type": "SIBLING",
               "role": "SIBLING",
               "relatedPersonId": "1:1:X7YY-YYWX",
               "relatedPersonName": "Ida Susan"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "CHILD",
+              "relatedPersonId": "1:1:X7YY-B923",
+              "relatedPersonName": "Kitty"
             },
             {
               "type": "SIBLING",
@@ -1681,10 +1560,22 @@
               "relatedPersonName": "Emmorin"
             },
             {
+              "type": "SIBLING",
+              "role": "SIBLING",
+              "relatedPersonId": "1:1:X7YY-TD5K",
+              "relatedPersonName": "Luella"
+            },
+            {
               "type": "PARENT_CHILD",
               "role": "CHILD",
-              "relatedPersonId": "1:1:X7YY-B923",
-              "relatedPersonName": "Kitty"
+              "relatedPersonId": "1:1:X7YY-B92S",
+              "relatedPersonName": "George Ockerman"
+            },
+            {
+              "type": "PARENT_CHILD",
+              "role": "PARENT",
+              "relatedPersonId": "1:1:X7YY-TD5L",
+              "relatedPersonName": "John"
             }
           ],
           "attachedPersons": [],

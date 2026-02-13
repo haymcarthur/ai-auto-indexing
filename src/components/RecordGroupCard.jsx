@@ -17,46 +17,24 @@ import { bold } from "../../ux-zion-library/src/tokens/typography";
 import { getAllRecordGroupsUnfiltered, getAllNamesUnfiltered } from '../utils/censusData';
 import { AddPersonQuickGlance } from './AddPersonQuickGlance';
 
-const COMMON_RELATIONSHIPS = [
-  'Child',
-  'Divorced Spouse',
-  'Domestic Partner',
-  'Fiancé',
-  'Parent',
-  'Sibling',
+// Core relationship types based on bidirectional pairs
+const RELATIONSHIPS = [
   'Spouse',
-  'No Relation'
-];
-
-const OTHER_RELATIONSHIPS = [
-  'Adopted Child',
-  'Adopted Parent',
+  'Parent',
+  'Child',
+  'Sibling',
   'Aunt or Uncle',
-  'Child-in-law',
-  'Cousin',
-  'Foster Child',
-  'Foster Parent',
-  'Godchild',
-  'Godparent',
-  'Grandchild',
-  'Grandparent',
-  'Guardian Child',
-  'Guardian Parent',
   'Niece or Nephew',
-  'Parent-in-law',
-  'Relative',
-  'Sibling-in-law',
-  'Stepchild',
+  'Cousin',
+  'Grandparent',
+  'Grandchild',
   'Stepparent',
+  'Stepchild',
   'Stepsibling',
-  'Surrogate Child',
-  'Surrogate Parent',
-  'Ancestor',
-  'Associate',
-  'Descendant',
-  'Enslaved Person',
-  'Slaveholder',
-  'Other'
+  'Parent-in-law',
+  'Child-in-law',
+  'Sibling-in-law',
+  'No Relation'
 ];
 
 export const RecordGroupCard = ({
@@ -96,7 +74,6 @@ export const RecordGroupCard = ({
     const isEnteringEditMode = (state === 'edit' || state === 'add') && prevState !== state;
 
     if (isEnteringEditMode) {
-      console.log('[RecordGroupCard useEffect] Entering edit/add mode, resetting formData');
       setFormData({
         recordGroup: data.recordGroup || null,
         members: (data.members || []).map(m => ({
@@ -167,8 +144,6 @@ export const RecordGroupCard = ({
   // Get display value - just return the group name as is
   const getRecordGroupDisplayValue = () => {
     const displayVal = formData.recordGroup?.primaryName || '';
-    console.log('[getRecordGroupDisplayValue] formData.recordGroup:', formData.recordGroup);
-    console.log('[getRecordGroupDisplayValue] returning:', displayVal);
     return displayVal;
   };
 
@@ -274,11 +249,11 @@ export const RecordGroupCard = ({
         </div>
         <div style={{ flex: 1 }}>
           <Header level="h5" style={{ color: headingColor, marginBottom: showSubheading ? '2px' : 0 }}>
-            Record Group
+            Household Details
           </Header>
           {showSubheading && (
             <div style={{ fontSize: '12px', color: colors.gray.gray60 }}>
-              Record Group and Member Relationships
+              Household and Member Relationships
             </div>
           )}
         </div>
@@ -308,7 +283,7 @@ export const RecordGroupCard = ({
             color: transparentColors.transparentGray40,
             marginBottom: '2px'
           }}>
-            Record Group • {data.recordGroup.type || 'Census'}
+            Household • {data.recordGroup.type || 'Census'}
           </div>
           <div style={{ fontSize: '14px', color: transparentColors.transparentGray40 }}>
             Primary: {data.recordGroup.primaryName || ''}
@@ -346,7 +321,7 @@ export const RecordGroupCard = ({
             color: colors.gray.gray100,
             marginBottom: '2px'
           }}>
-            Record Group • {data.recordGroup.type || 'Census'}
+            Household • {data.recordGroup.type || 'Census'}
           </div>
           <div style={{ fontSize: '14px', color: colors.gray.gray100 }}>
             Primary: {data.recordGroup.primaryName || ''}
@@ -376,34 +351,30 @@ export const RecordGroupCard = ({
     return (
       <>
         <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
-          Create a new record group, or include with an existing one?
+          Create a new household or choose an existing one.
         </Paragraph>
 
-        {/* AutoSuggest for Record Group */}
+        {/* AutoSuggest for Household */}
         <div style={{ marginBottom: spacing.xs }}>
           <AutoSuggest
-            label="Record Group"
-            placeholder="Select record group..."
+            label="Household"
+            placeholder="Select household..."
             value={getRecordGroupDisplayValue()}
             clearable={true}
             options={availableRecordGroups}
             allowCreate={false}
             onChange={(value) => {
-              console.log('[RecordGroupCard onChange] value received:', value);
 
               // Check if this is the new group option or an existing one
               const selectedOption = availableRecordGroups.find(g => g.value === value);
               const isNewGroup = selectedOption?.isNewGroup || false;
 
-              console.log('[RecordGroupCard onChange] selectedOption:', selectedOption);
-              console.log('[RecordGroupCard onChange] isNewGroup:', isNewGroup);
 
               if (!isNewGroup && censusData) {
                 // Find the selected record group
                 const allGroups = getAllRecordGroupsUnfiltered(censusData);
                 const selectedGroup = allGroups.find(g => g.name === value);
 
-                console.log('[RecordGroupCard onChange] selectedGroup:', selectedGroup);
 
                 if (selectedGroup && selectedGroup.people) {
                   // Convert people to member format
@@ -428,7 +399,6 @@ export const RecordGroupCard = ({
                     },
                     members: newMembers
                   };
-                  console.log('[RecordGroupCard onChange] Setting formData to:', newData);
                   setFormData(prev => ({
                     ...prev,
                     ...newData
@@ -436,7 +406,6 @@ export const RecordGroupCard = ({
 
                   // Find the actual record from census data to get record-level data
                   const record = censusData.records.find(r => r.id === selectedGroup.id);
-                  console.log('[RecordGroupCard onChange] Found record:', record);
                   if (record && onRecordGroupSelected) {
                     const eventData = {
                       recordId: record.id,
@@ -444,7 +413,6 @@ export const RecordGroupCard = ({
                       date: record.date || '',
                       place: record.place || ''
                     };
-                    console.log('[RecordGroupCard onChange] Calling onRecordGroupSelected with:', eventData);
                     // Notify parent with record event data
                     onRecordGroupSelected(eventData);
                   }
@@ -459,7 +427,6 @@ export const RecordGroupCard = ({
                 }
               } else {
                 // For new groups, keep the full "New Group: [name] Household" value
-                console.log('[RecordGroupCard onChange] New group - keeping value as is:', value);
 
                 const newData = {
                   recordGroup: {
@@ -468,7 +435,6 @@ export const RecordGroupCard = ({
                   },
                   members: []
                 };
-                console.log('[RecordGroupCard onChange] Setting formData to:', newData);
 
                 setFormData(prev => ({
                   ...prev,
@@ -480,37 +446,17 @@ export const RecordGroupCard = ({
         </div>
 
         <Header level="h6" style={{ marginBottom: spacing.xxs }}>
-          Record Group Member Relations
+          Household Relationships
         </Header>
+
+        <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
+          Add individuals to this household and indicate how they are related to {currentPersonName || 'this person'}.
+        </Paragraph>
 
         {/* Member Relationship Rows */}
         {formData.members?.map((member, index) => (
           <div key={index} style={{ marginBottom: spacing.xs }}>
             <div style={{ display: 'flex', gap: spacing.xxs, marginBottom: spacing.xxs, alignItems: 'flex-end' }}>
-              {/* Select for Relationship */}
-              <div style={{ width: '160px' }}>
-                <Select
-                  label="Relationship"
-                  value={member.relationship}
-                  onChange={(e) => {
-                    const newMembers = [...formData.members];
-                    newMembers[index].relationship = e.target.value;
-                    setFormData(prev => ({ ...prev, members: newMembers }));
-                  }}
-                >
-                  <optgroup label="Common Relationships">
-                    {COMMON_RELATIONSHIPS.map(rel => (
-                      <option key={rel} value={rel}>{rel}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Other Relationships">
-                    {OTHER_RELATIONSHIPS.map(rel => (
-                      <option key={rel} value={rel}>{rel}</option>
-                    ))}
-                  </optgroup>
-                </Select>
-              </div>
-
               {/* AutoSuggest for Name */}
               <div style={{ flex: 1 }} ref={(el) => { if (el) autoSuggestRefs.current[index] = el; }}>
                 <AutoSuggest
@@ -539,6 +485,23 @@ export const RecordGroupCard = ({
                     }
                   }}
                 />
+              </div>
+
+              {/* Select for Relationship */}
+              <div style={{ width: '160px' }}>
+                <Select
+                  label="Relationship"
+                  value={member.relationship}
+                  onChange={(e) => {
+                    const newMembers = [...formData.members];
+                    newMembers[index].relationship = e.target.value;
+                    setFormData(prev => ({ ...prev, members: newMembers }));
+                  }}
+                >
+                  {RELATIONSHIPS.map(rel => (
+                    <option key={rel} value={rel}>{rel}</option>
+                  ))}
+                </Select>
               </div>
 
               {/* Delete Button */}
@@ -579,7 +542,7 @@ export const RecordGroupCard = ({
           </div>
         ))}
 
-        {/* Add Group Member Button */}
+        {/* Add Household Member Button */}
         <div style={{ marginBottom: spacing.xs }}>
           <Button
             variant="blue"
@@ -589,11 +552,11 @@ export const RecordGroupCard = ({
             onClick={() => {
               setFormData(prev => ({
                 ...prev,
-                members: [...prev.members, { relationship: 'Child', name: '' }]
+                members: [...prev.members, { relationship: 'No Relation', name: '' }]
               }));
             }}
           >
-            Group Member
+            Household Member
           </Button>
         </div>
       </>

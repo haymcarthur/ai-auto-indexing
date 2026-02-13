@@ -353,7 +353,7 @@ export const ManageNamesInfoSheet = ({ censusData, recordGroups, onBack, onClose
       <Divider style={{ marginTop: spacing.xxs, marginBottom: spacing.xxs }} />
 
       {/* Existing Record Groups */}
-      {allRecordGroups.map((recordGroup, groupIndex) => {
+      {recordGroups.map((recordGroup, groupIndex) => {
         const primaryPerson = recordGroup.people.find(p => p.relationship === 'Primary');
         const primaryName = primaryPerson?.fullName || recordGroup.primary;
 
@@ -371,11 +371,11 @@ export const ManageNamesInfoSheet = ({ censusData, recordGroups, onBack, onClose
                 padding: dropTarget === recordGroup.id ? '8px' : '0'
               }}
             >
-              {recordGroup.people.map((person, personIndex) => {
-                const isPrimary = person.relationship === 'Primary';
+              {recordGroup.people.filter(person => person.isVisible === true).map((person, personIndex) => {
+                const isPrimary = person.isPrimary || person.relationship === 'Primary';
                 const relationshipDisplay = isPrimary
                   ? 'Primary'
-                  : `${person.relationship} of ${primaryName}`;
+                  : person.relationship;
 
                 return (
                   <div

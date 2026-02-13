@@ -81,23 +81,18 @@ export function useScreenRecording() {
       // Handle data available event
       mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          console.log('[RECORDING] Data chunk received, size:', event.data.size, 'bytes');
           chunksRef.current.push(event.data);
         }
       };
 
       // Handle recording stop
       mediaRecorder.onstop = () => {
-        console.log('[RECORDING] MediaRecorder stopped, chunks:', chunksRef.current.length);
         const blob = new Blob(chunksRef.current, { type: 'video/webm' });
-        console.log('[RECORDING] Created blob, size:', blob.size, 'bytes');
 
         // Store in both state AND ref for synchronous access
         recordingBlobRef.current = blob;
         setRecordingBlob(blob);
         setIsRecording(false);
-
-        console.log('[RECORDING] Blob stored in ref and state');
 
         // Clean up streams
         if (streamRef.current) {
@@ -114,21 +109,16 @@ export function useScreenRecording() {
       };
 
       // Start recording
-      console.log('[RECORDING] Starting MediaRecorder...');
       mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
       setPermissionGranted(true);
-      console.log('[RECORDING] MediaRecorder started successfully');
 
       // Handle user stopping screen share from browser UI
       displayStream.getVideoTracks()[0].onended = () => {
-        console.log('Screen sharing stopped by user');
-
         // Save the current recording chunks as a partial recording
         if (chunksRef.current.length > 0) {
           const partialBlob = new Blob(chunksRef.current, { type: 'video/webm' });
           partialRecordingsRef.current.push(partialBlob);
-          console.log('Saved partial recording, total partials:', partialRecordingsRef.current.length);
         }
 
         // Stop the media recorder
@@ -171,15 +161,8 @@ export function useScreenRecording() {
    * Stop recording
    */
   const stopRecording = useCallback(() => {
-    console.log('[RECORDING] stopRecording called');
-    console.log('[RECORDING] MediaRecorder state:', mediaRecorderRef.current?.state);
-    console.log('[RECORDING] Current chunks:', chunksRef.current.length);
-
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      console.log('[RECORDING] Stopping MediaRecorder...');
       mediaRecorderRef.current.stop();
-    } else {
-      console.warn('[RECORDING] MediaRecorder not recording or not available');
     }
   }, []);
 
@@ -197,26 +180,18 @@ export function useScreenRecording() {
    * Get the current recording blob (combines all partial recordings if any)
    */
   const getRecordingBlob = useCallback(() => {
-    console.log('[RECORDING] getRecordingBlob called');
-    console.log('[RECORDING] recordingBlobRef:', recordingBlobRef.current ? `${recordingBlobRef.current.size} bytes` : 'null');
-    console.log('[RECORDING] recordingBlob state:', recordingBlob ? `${recordingBlob.size} bytes` : 'null');
-    console.log('[RECORDING] Partial recordings:', partialRecordingsRef.current.length);
-
     // Use ref instead of state for synchronous access
     const currentBlob = recordingBlobRef.current;
 
     // If we have partial recordings, combine them with the final recording
     if (partialRecordingsRef.current.length > 0 && currentBlob) {
       const allBlobs = [...partialRecordingsRef.current, currentBlob];
-      console.log('[RECORDING] Combining', allBlobs.length, 'recording segments');
       return new Blob(allBlobs, { type: 'video/webm' });
     } else if (partialRecordingsRef.current.length > 0) {
       // Only partial recordings exist
-      console.log('[RECORDING] Returning', partialRecordingsRef.current.length, 'partial recordings');
       return new Blob(partialRecordingsRef.current, { type: 'video/webm' });
     }
 
-    console.log('[RECORDING] Returning recordingBlob from ref:', currentBlob ? `${currentBlob.size} bytes` : 'null');
     return currentBlob;
   }, [recordingBlob]);
 

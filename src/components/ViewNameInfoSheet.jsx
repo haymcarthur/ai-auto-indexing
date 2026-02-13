@@ -18,6 +18,7 @@ import { colors } from "../../ux-zion-library/src/tokens/colors";
 import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 
 export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateCensusData, onBack, onClose, onDelete }) => {
+
   // Use state to track current person, so it can be refreshed after updates
   const [person, setPerson] = useState(initialPerson);
 
@@ -52,6 +53,12 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
     newPersonName: '',
     newPersonId: null
   });
+
+  // Helper function to get full name from person object
+  const getFullName = (person) => {
+    if (!person) return '';
+    return `${person.givenName || ''} ${person.surname || ''}`.trim() || 'Unknown Name';
+  };
 
   const handleEditCard = (cardName) => {
     setCardStates(prev => ({
@@ -89,7 +96,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
                 .filter(p => p.id !== foundPerson.id)
                 .map(p => {
                   // If the person being moved is Primary/Head, show others' relationships to them (as-is)
-                  if (foundPerson.relationship === 'Primary' || foundPerson.relationship === 'Head') {
+                  if (foundPerson.isPrimary) {
                     return {
                       relationship: p.relationship,
                       name: `${p.givenName} ${p.surname}`.trim()
@@ -97,7 +104,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
                   }
                   // If Primary/Head is in the group, show the INVERSE of the person's relationship
                   // e.g., if Ronald is "Son" to Edgar (Head), show Edgar as "Parent" to Ronald
-                  if (p.relationship === 'Primary' || p.relationship === 'Head') {
+                  if (p.isPrimary) {
                     return {
                       relationship: getInverseRelationship(foundPerson.relationship),
                       name: `${p.givenName} ${p.surname}`.trim()
@@ -127,9 +134,9 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
       if (peopleToMove.length > 0) {
         // Get current group members (excluding the current viewing person but INCLUDING other people being moved)
         const currentGroupMembers = getRecordGroupPeople(censusData, currentRecord.id)
-          .filter(p => p.id !== person.id && p.fullName !== peopleToMove[0].name)
+          .filter(p => p.id !== person.id && getFullName(p) !== peopleToMove[0].name)
           .map(p => ({
-            name: p.fullName,
+            name: getFullName(p),
             relationship: p.relationship
           }));
 
@@ -195,6 +202,51 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
         const personToUpdate = record.people.find(p => p.id === person.id);
         if (personToUpdate) {
           personToUpdate.additionalFacts = formData.facts;
+          break;
+        }
+      }
+
+      onUpdateCensusData?.(updatedCensusData);
+
+      setCardStates(prev => ({
+        ...prev,
+        [cardName]: 'review'
+      }));
+    } else if (cardName === 'essentialInfo') {
+      // Handle essential info card save - update person's basic info
+      const updatedCensusData = {
+        records: censusData.records.map(record => ({
+          ...record,
+          people: record.people.map(p => ({ ...p }))
+        }))
+      };
+
+      // Find the person and update their info
+      for (const record of updatedCensusData.records) {
+        const personToUpdate = record.people.find(p => p.id === person.id);
+        if (personToUpdate) {
+          // Update basic info
+          if (formData.names && formData.names.length > 0) {
+            personToUpdate.givenName = formData.names[0].givenName || '';
+            personToUpdate.surname = formData.names[0].surname || '';
+          }
+          personToUpdate.sex = formData.sex || '';
+          personToUpdate.race = formData.race || '';
+          personToUpdate.age = formData.age || '';
+
+          // Handle isPrimary change
+          if (formData.isPrimary !== person.isPrimary) {
+            if (formData.isPrimary) {
+              // Set this person as primary and all others in record as not primary
+              record.people.forEach(p => {
+                p.isPrimary = (p.id === person.id);
+              });
+            } else {
+              // Just set this person as not primary
+              personToUpdate.isPrimary = false;
+            }
+          }
+
           break;
         }
       }
@@ -303,11 +355,11 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
       const currentGroupMembers = getRecordGroupPeople(censusData, currentRecord.id)
         .filter(p => {
           if (p.id === person.id) return false;
-          if (p.fullName === nextPerson.name) return false;
+          if (getFullName(p) === nextPerson.name) return false;
           return true;
         })
         .map(p => ({
-          name: p.fullName,
+          name: getFullName(p),
           relationship: p.relationship
         }));
 
@@ -390,8 +442,6 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
     peopleToMove.forEach(moveInfo => {
       const { name: movedPersonName, newRelationshipsWithGroup } = moveInfo;
 
-      console.log('Applying relationships for:', movedPersonName);
-      console.log('New relationships:', newRelationshipsWithGroup);
 
       if (!newRelationshipsWithGroup || newRelationshipsWithGroup.length === 0) return;
 
@@ -402,16 +452,13 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
       });
 
       if (!movedPerson) {
-        console.log('Could not find moved person:', movedPersonName);
         return;
       }
 
-      console.log('Found moved person:', movedPerson);
 
       // Apply relationships - for now we just store the relationship on the moved person
       // The relationship system is based on relationship to Primary, so we need to handle this carefully
       newRelationshipsWithGroup.forEach(newRel => {
-        console.log('Processing relationship:', newRel);
 
         // Find the target person in the current record
         const targetPerson = currentRecord.people.find(p => {
@@ -420,50 +467,39 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
         });
 
         if (!targetPerson) {
-          console.log('Could not find target person:', newRel.name);
           return;
         }
 
-        console.log('Target person:', targetPerson.givenName, 'relationship:', targetPerson.relationship);
 
         // If the target is Primary/Head, update the moved person's relationship
-        if (targetPerson.relationship === 'Primary' || targetPerson.relationship === 'Head') {
-          console.log('Target is Primary/Head, setting moved person relationship to:', newRel.relationship);
+        if (targetPerson.isPrimary) {
           movedPerson.relationship = newRel.relationship;
         } else {
           // Target is not Primary - need to infer relationship to Primary
           // If setting as Sibling to someone who is "Son", then this person should also be "Son"
           // If setting as Sibling to someone who is "Child", then this person should also be "Child"
-          console.log('Target is not Primary/Head, inferring relationship to Primary based on:', newRel.relationship, 'and target relationship:', targetPerson.relationship);
 
           if (newRel.relationship === 'Sibling') {
             // If they're siblings, they should have the same relationship to Primary
-            console.log('Setting as sibling - copying target relationship:', targetPerson.relationship);
             movedPerson.relationship = targetPerson.relationship;
-            console.log('After setting, movedPerson.relationship is now:', movedPerson.relationship);
           } else if (newRel.relationship === 'No Relation') {
             // Keep the relationship they were assigned in the card (newRelationship)
-            console.log('No relation - keeping original relationship');
           } else {
             // For other relationships between non-Primary people, we can't accurately represent them
-            console.log('Cannot accurately store this relationship in current data model');
           }
         }
       });
     });
 
-    console.log('Final census data before update:');
     const peopleList = currentRecord.people.map(p => ({
       name: `${p.givenName} ${p.surname}`,
       relationship: p.relationship
     }));
-    console.log('Current record people:', peopleList);
     peopleList.forEach(p => console.log(`  - ${p.name}: ${p.relationship}`));
 
     // Update census data
     onUpdateCensusData?.(updatedCensusData);
 
-    console.log('Census data updated');
 
     // Close dialog and set to review state
     setDialogState({
@@ -645,7 +681,6 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
       newPersonId: null
     });
     // TODO: Open add details infoSheet for the person with newPersonDialog.newPersonId
-    console.log('TODO: Open add details sheet for person:', newPersonDialog.newPersonId);
   };
 
   const handleSkipPersonDetails = () => {
@@ -658,7 +693,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
   };
 
   const getRelationshipDisplay = () => {
-    if (person.relationship === 'Primary') {
+    if (person.isPrimary) {
       return 'Primary';
     }
     return `${person.relationship} to Primary`;
@@ -666,7 +701,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
 
   // Sample data structure - in real app this would come from person prop
   const essentialInfoData = {
-    isPrimary: person.relationship === 'Primary',
+    isPrimary: person.isPrimary || false,
     names: [
       {
         type: 'Birth Name',
@@ -743,9 +778,9 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
     const allPeople = getRecordGroupPeople(censusData, record.id);
 
     // Find the primary person for the record group name
-    const primaryPerson = allPeople.find(p => p.relationship === 'Primary');
+    const primaryPerson = allPeople.find(p => p.isPrimary);
     const recordGroupName = primaryPerson
-      ? primaryPerson.fullName
+      ? getFullName(primaryPerson)
       : 'Census';
 
     // Build members array (all people except the current person)
@@ -753,9 +788,10 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
     const members = allPeople
       .filter(p => p.id !== person.id)
       .map(p => {
-        // Check if there's a relationship defined in the current person's relationships array
-        if (person.relationships && person.relationships.length > 0) {
-          const rel = person.relationships.find(r => r.relatedPersonId === p.id);
+        // Check if there's a relationship from the other person to the current person
+        // This shows what the OTHER person is to the current person
+        if (p.relationships && p.relationships.length > 0) {
+          const rel = p.relationships.find(r => r.relatedPersonId === person.id);
           if (rel) {
             // Capitalize the role for display
             const displayRole = rel.role.split('_').map(word =>
@@ -764,26 +800,26 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
 
             return {
               relationship: displayRole,
-              name: p.fullName
+              name: getFullName(p)
             };
           }
         }
 
         // Fallback to old logic if relationships array doesn't exist or relationship not found
         // If viewing the Primary person, show everyone's relationships as-is
-        if (person.relationship === 'Primary' || person.relationship === 'Head') {
+        if (person.isPrimary) {
           return {
             relationship: p.relationship,
-            name: p.fullName
+            name: getFullName(p)
           };
         }
 
         // If viewing a non-Primary person:
-        if (p.relationship === 'Primary' || p.relationship === 'Head') {
+        if (p.isPrimary) {
           // Show inverse of current person's relationship to Primary
           return {
             relationship: getInverseRelationship(person.relationship),
-            name: p.fullName
+            name: getFullName(p)
           };
         } else {
           // For other non-Primary people, check if they have the same relationship (siblings)
@@ -795,7 +831,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
               (otherRel === 'Son' || otherRel === 'Daughter' || otherRel === 'Child')) {
             return {
               relationship: 'Sibling',
-              name: p.fullName
+              name: getFullName(p)
             };
           }
 
@@ -804,25 +840,27 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
               (otherRel === 'Stepson' || otherRel === 'Stepdaughter' || otherRel === 'Stepchild')) {
             return {
               relationship: 'Stepsibling',
-              name: p.fullName
+              name: getFullName(p)
             };
           }
 
           // Otherwise, no direct relationship defined
           return {
             relationship: 'No Relation',
-            name: p.fullName
+            name: getFullName(p)
           };
         }
       });
 
-    return {
+    const result = {
       recordGroup: {
         type: 'Census',
         primaryName: recordGroupName
       },
       members
     };
+
+    return result;
   };
 
   const recordGroupData = getRecordGroupData();
@@ -846,14 +884,13 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
     // Get additional events from person (if they exist)
     const additionalEvents = person.events || [];
 
-    console.log('getEventsData for', person.fullName);
-    console.log('person.events:', person.events);
-    console.log('additionalEvents:', additionalEvents);
-
-    return {
+    const result = {
       primaryEvent,
       additionalEvents
     };
+
+
+    return result;
   };
 
   const eventsData = getEventsData();
@@ -872,7 +909,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
 
   // Get tree attachment data for this person
   const getTreeAttachmentData = () => {
-    const fullName = person.fullName;
+    const fullName = getFullName(person);
 
     // Map of hints
     const hints = {
@@ -1018,7 +1055,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
           {getRelationshipDisplay()}
         </div>
         <Header level="h4" style={{ marginBottom: spacing.xxs }}>
-          {person.fullName}
+          {getFullName(person)}
         </Header>
         <Button
           variant="blue"
@@ -1105,12 +1142,12 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
           emphasis="low"
           inline={true}
           onClick={() => {
-            if (window.confirm(`Are you sure you want to delete ${person.fullName}?`)) {
+            if (window.confirm(`Are you sure you want to delete ${getFullName(person)}?`)) {
               onDelete?.(person.id);
             }
           }}
         >
-          Delete {person.fullName}
+          Delete {getFullName(person)}
         </Button>
       </div>
 

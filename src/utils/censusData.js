@@ -30,6 +30,8 @@ export const getPerson = (censusData, personId) => {
         sex: person.sex,
         age: person.age,
         race: person.race,
+        isPrimary: person.isPrimary || false,
+        isVisible: person.isVisible,
         attachmentStatus: hasPersonId ? 'attached' : hasHint ? 'hint' : 'none',
         attachedPid: person.attachedPersons?.[0]?.pid || null,
         events: person.events || [],
@@ -74,6 +76,8 @@ export const getRecordGroupPeople = (censusData, recordId) => {
       sex: person.sex,
       age: person.age,
       race: person.race,
+      isPrimary: person.isPrimary || false,
+      isVisible: person.isVisible,
       attachmentStatus: hasPersonId ? 'attached' : hasHint ? 'hint' : 'none',
       attachedPid: person.attachedPersons?.[0]?.pid || null,
       relationships: person.relationships || []
@@ -90,8 +94,15 @@ export const getAllRecordGroups = (censusData) => {
   return records.map(record => {
     const people = getRecordGroupPeople(censusData, record.id);
 
+    // Sort people so primary person appears first
+    const sortedPeople = [...people].sort((a, b) => {
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return 1;
+      return 0;
+    });
+
     // Find primary person for group name
-    const primary = people.find(p => p.relationship === 'Primary');
+    const primary = sortedPeople.find(p => p.relationship === 'Primary');
     const groupName = primary
       ? `${primary.fullName} Household`
       : 'Unnamed Household';
@@ -100,7 +111,7 @@ export const getAllRecordGroups = (censusData) => {
       id: record.id,
       name: groupName,
       primary: primary?.fullName || '',
-      people
+      people: sortedPeople
     };
   }).filter(group => group.people.length > 0); // Only include groups with people
 };
@@ -145,6 +156,7 @@ export const getAllRecordGroupsUnfiltered = (censusData) => {
         sex: person.sex,
         age: person.age,
         race: person.race,
+        isPrimary: person.isPrimary || false,
         attachmentStatus: hasPersonId ? 'attached' : hasHint ? 'hint' : 'none',
         attachedPid: person.attachedPersons?.[0]?.pid || null,
         events: person.events || [],
@@ -152,19 +164,26 @@ export const getAllRecordGroupsUnfiltered = (censusData) => {
       };
     });
 
-    // Find primary person for group name
-    const primary = people.find(p => p.relationship === 'Primary');
+    // Sort people so primary person appears first
+    const sortedPeople = [...people].sort((a, b) => {
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return 1;
+      return 0;
+    });
+
+    // Find primary person for group name (use isPrimary flag)
+    const primary = sortedPeople.find(p => p.isPrimary);
     const groupName = primary
       ? `${primary.fullName} Household`
-      : people[0]?.fullName
-        ? `${people[0].fullName} Household`
+      : sortedPeople[0]?.fullName
+        ? `${sortedPeople[0].fullName} Household`
         : 'Unnamed Household';
 
     return {
       id: record.id,
       name: groupName,
-      primary: primary?.fullName || people[0]?.fullName || '',
-      people
+      primary: primary?.fullName || sortedPeople[0]?.fullName || '',
+      people: sortedPeople
     };
   });
 };
@@ -176,4 +195,67 @@ export const getAllRecordGroupsUnfiltered = (censusData) => {
 export const getAllNamesUnfiltered = (censusData) => {
   const allGroups = getAllRecordGroupsUnfiltered(censusData);
   return allGroups.flatMap(group => group.people);
+};
+
+/**
+ * Find potential matching records based on given name and surname
+ * Supports partial matching (finding family members in households)
+ *
+ * @param {object} censusData - The census data object
+ * @param {object} criteria - Search criteria {givenName, surname}
+ * @returns {array} Array of matching records with details
+ */
+export const findPotentialMatches = (censusData, criteria) => {
+  const { givenName, surname } = criteria;
+  const records = getRecords(censusData);
+  const matches = [];
+
+  if (!givenName) {
+    return matches; // No search criteria
+  }
+
+  records.forEach(record => {
+    const people = record.people || [];
+
+    // Check if any person in record matches the search
+    const matchingPerson = people.find(person => {
+      // Match if givenName matches exactly (case-insensitive)
+      const givenMatch = person.givenName?.toLowerCase() === givenName?.toLowerCase();
+
+      // Match surname loosely (optional or matching)
+      const surnameMatch = !surname ||
+        surname === '' ||
+        person.surname?.toLowerCase() === surname?.toLowerCase();
+
+      return givenMatch && surnameMatch;
+    });
+
+    if (matchingPerson) {
+      // Find primary person for display
+      const primary = people.find(p => p.isPrimary) || people[0];
+
+      // Get all relationships (names of other people in household)
+      const relationships = people
+        .filter(p => p.id !== primary.id)
+        .map(p => {
+          const fullName = `${p.givenName || ''} ${p.surname || ''}`.trim();
+          return fullName || p.givenName || 'Unknown';
+        })
+        .filter(name => name);
+
+      matches.push({
+        recordId: record.id,
+        matchedPersonId: matchingPerson.id,
+        primaryId: primary.id,
+        primaryName: `${primary.givenName || ''} ${primary.surname || ''}`.trim() || primary.givenName || 'Unknown',
+        primaryAge: primary.age || 'Unknown',
+        householdSize: people.length,
+        relationships: relationships,
+        allPeople: people,
+        record: record
+      });
+    }
+  });
+
+  return matches;
 };

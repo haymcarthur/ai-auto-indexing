@@ -1,88 +1,91 @@
 /**
  * Validate that the task was completed correctly
- * Task: Add Gary Fadden and Ronald Fadden to Edgar Fadden's household
+ * Task: Add John Ockerman and his family (Reamy, Isaic, Joseph, George, Christopher)
  *
  * @param {Object} censusData - The census data object
  * @returns {Object} Validation results
  */
 export function validateTask(censusData) {
   const results = {
-    garyAdded: false,
-    ronaldAdded: false,
+    johnAdded: false,
+    reamyAdded: false,
+    isaicAdded: false,
+    josephAdded: false,
+    georgeAdded: false,
+    christopherAdded: false,
+    allPeopleAdded: false,
     correctGroup: false,
-    correctRelationships: false,
-    edgarRecordId: null,
-    garyDetails: null,
-    ronaldDetails: null
+    johnRecordId: null,
+    peopleDetails: {}
   };
 
-  // Find Edgar Fadden's record
-  const edgarRecord = censusData.records.find(record => {
-    return record.people.some(person =>
-      person.givenName?.includes('Edgar') &&
-      person.surname?.toLowerCase() === 'fadden'
+  // Required people for John Ockerman's household
+  // Note: In the data, only John has surname "Ockerman", others may have empty surnames
+  // For spouse, name might be "Heamy" or "Reamy"
+  const requiredPeople = [
+    { name: 'John', surname: 'Ockerman', key: 'johnAdded', requireSurname: true },
+    { name: 'Reamy', alternateNames: ['Heamy'], key: 'reamyAdded', requireSurname: false },
+    { name: 'Isaic', key: 'isaicAdded', requireSurname: false },
+    { name: 'Joseph', key: 'josephAdded', requireSurname: false },
+    { name: 'George', key: 'georgeAdded', requireSurname: false },
+    { name: 'Christopher', key: 'christopherAdded', requireSurname: false }
+  ];
+
+  // Find John Ockerman's record (the one with John Ockerman and spouse Heamy/Reamy)
+  // Note: Spouse name might be "Heamy" or "Reamy" and may not have surname
+  const johnRecord = censusData.records.find(record => {
+    const hasJohn = record.people.some(person =>
+      person.givenName?.toLowerCase().includes('john') &&
+      person.surname?.toLowerCase() === 'ockerman'
     );
+    const hasSpouse = record.people.some(person =>
+      (person.givenName?.toLowerCase().includes('reamy') ||
+       person.givenName?.toLowerCase().includes('heamy'))
+    );
+    return hasJohn && hasSpouse;
   });
 
-  if (!edgarRecord) {
-    console.warn('Could not find Edgar Fadden\'s record');
+  if (!johnRecord) {
+    console.warn('Could not find John Ockerman\'s record (married to Reamy/Heamy)');
     return results;
   }
 
-  results.edgarRecordId = edgarRecord.id;
+  results.johnRecordId = johnRecord.id;
 
-  // Check if Gary Fadden is in Edgar's household
-  const gary = edgarRecord.people.find(person =>
-    person.givenName?.toLowerCase().includes('gary') &&
-    person.surname?.toLowerCase() === 'fadden'
-  );
+  // Check each required person
+  requiredPeople.forEach(({ name, surname, key, requireSurname, alternateNames }) => {
+    const person = johnRecord.people.find(p => {
+      const givenNameLower = p.givenName?.toLowerCase() || '';
 
-  if (gary) {
-    results.garyAdded = true;
-    results.garyDetails = {
-      id: gary.id,
-      name: `${gary.givenName} ${gary.surname}`,
-      relationship: gary.relationship
-    };
-  }
+      // Check if given name matches (including alternate names)
+      const nameMatches = givenNameLower.includes(name.toLowerCase()) ||
+        (alternateNames && alternateNames.some(alt => givenNameLower.includes(alt.toLowerCase())));
 
-  // Check if Ronald Fadden is in Edgar's household
-  const ronald = edgarRecord.people.find(person =>
-    person.givenName?.toLowerCase().includes('ronald') &&
-    person.surname?.toLowerCase() === 'fadden'
-  );
+      if (!nameMatches) return false;
 
-  if (ronald) {
-    results.ronaldAdded = true;
-    results.ronaldDetails = {
-      id: ronald.id,
-      name: `${ronald.givenName} ${ronald.surname}`,
-      relationship: ronald.relationship
-    };
-  }
+      // If surname is required, check it matches
+      if (requireSurname && surname) {
+        const surnameLower = p.surname?.toLowerCase() || '';
+        return surnameLower === surname.toLowerCase();
+      }
 
-  // Check if both are in the correct group
-  results.correctGroup = results.garyAdded && results.ronaldAdded;
+      // If surname not required, just need name match
+      return true;
+    });
 
-  // Validate relationships (should be appropriate family relationships)
-  // For this census, typical relationships are: Head, Wife, Son, Daughter, etc.
-  const validRelationships = [
-    'Head', 'Wife', 'Husband', 'Son', 'Daughter',
-    'Father', 'Mother', 'Brother', 'Sister',
-    'Grandson', 'Granddaughter', 'Nephew', 'Niece',
-    'Uncle', 'Aunt', 'Cousin', 'Boarder', 'Lodger'
-  ];
+    if (person) {
+      results[key] = true;
+      results.peopleDetails[name] = {
+        id: person.id,
+        name: `${person.givenName} ${person.surname || ''}`.trim(),
+        relationship: person.relationship
+      };
+    }
+  });
 
-  const garyHasValidRelationship = gary && validRelationships.includes(gary.relationship);
-  const ronaldHasValidRelationship = ronald && validRelationships.includes(ronald.relationship);
-
-  results.correctRelationships = (
-    (!gary || garyHasValidRelationship) &&
-    (!ronald || ronaldHasValidRelationship)
-  );
-
-  // Log results for debugging
-  console.log('Task validation results:', results);
+  // Check if all people are added
+  results.allPeopleAdded = requiredPeople.every(({ key }) => results[key]);
+  results.correctGroup = results.allPeopleAdded;
 
   return results;
 }
@@ -95,22 +98,22 @@ export function validateTask(censusData) {
 export function getValidationSummary(validationResults) {
   const parts = [];
 
-  if (validationResults.garyAdded) {
-    parts.push(`✓ Gary Fadden added as ${validationResults.garyDetails.relationship}`);
-  } else {
-    parts.push('✗ Gary Fadden not found in Edgar\'s household');
-  }
+  const people = ['John', 'Reamy', 'Isaic', 'Joseph', 'George', 'Christopher'];
+  people.forEach(name => {
+    const key = `${name.toLowerCase()}Added`;
+    const details = validationResults.peopleDetails?.[name];
 
-  if (validationResults.ronaldAdded) {
-    parts.push(`✓ Ronald Fadden added as ${validationResults.ronaldDetails.relationship}`);
-  } else {
-    parts.push('✗ Ronald Fadden not found in Edgar\'s household');
-  }
+    if (validationResults[key]) {
+      parts.push(`✓ ${name} Ockerman added${details?.relationship ? ` as ${details.relationship}` : ''}`);
+    } else {
+      parts.push(`✗ ${name} Ockerman not found`);
+    }
+  });
 
-  if (validationResults.correctRelationships) {
-    parts.push('✓ Relationships are valid');
+  if (validationResults.allPeopleAdded) {
+    parts.push('✓ All people added successfully');
   } else {
-    parts.push('✗ Invalid relationships detected');
+    parts.push('✗ Not all people were added');
   }
 
   return parts.join('\n');

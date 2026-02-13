@@ -276,8 +276,12 @@ export const EventsCard = ({
     return (
       <>
         <Header level="h6" style={{ marginBottom: spacing.xxs }}>
-          Record Primary Event
+          Primary Event
         </Header>
+
+        <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
+          What is the main event captured in this document?
+        </Paragraph>
 
         {/* Primary Event Fields */}
         <div style={{ marginBottom: spacing.xs }}>

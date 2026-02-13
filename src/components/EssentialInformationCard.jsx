@@ -10,10 +10,12 @@ import { Toggle } from "../../ux-zion-library/src/components/Toggle";
 import { IconButton } from "../../ux-zion-library/src/components/IconButton";
 import { MenuOverlay, useMenuOverlay } from "../../ux-zion-library/src/components/MenuOverlay";
 import { Checkbox } from "../../ux-zion-library/src/components/Checkbox";
-import { DocumentRecordPerson, ContentAdd, ContentDelete } from "../../ux-zion-library/src/icons";
+import { ListItem } from "../../ux-zion-library/src/components/ListItem";
+import { DocumentRecordPerson, ContentAdd, ContentDelete, HelpAi, ArrowCaret } from "../../ux-zion-library/src/icons";
 import { colors, transparentColors } from "../../ux-zion-library/src/tokens/colors";
 import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 import { bold } from "../../ux-zion-library/src/tokens/typography";
+import { findPotentialMatches } from '../utils/censusData';
 
 const NAME_TYPE_OPTIONS = [
   'Also Known As',
@@ -32,7 +34,11 @@ export const EssentialInformationCard = ({
   onCancel,
   onNext,
   onEdit,
-  isNewRecord = false
+  isNewRecord = false,
+  onShowFindDetails,
+  onShowAISelection,
+  censusData,
+  currentApproach = 'A' // 'A' or 'B' - determines which AI flow to show
 }) => {
   const [formData, setFormData] = useState({
     isPrimary: data.isPrimary !== undefined ? data.isPrimary : isNewRecord,
@@ -53,6 +59,31 @@ export const EssentialInformationCard = ({
     surname: true,
     surnamePrefix: false
   });
+
+  const [showAISuggestion, setShowAISuggestion] = useState(false);
+  const [aiSuggestionName, setAISuggestionName] = useState('');
+
+  // Check for AI suggestion when names change (Approach A only)
+  useEffect(() => {
+    if (currentApproach === 'A' && state === 'add' && formData.names?.[0] && censusData && onShowFindDetails) {
+      const { givenName, surname } = formData.names[0];
+      // Show AI suggestion after 3 characters in given name
+      if (givenName && givenName.length >= 3) {
+        // Check if there are hidden records matching this name
+        const matches = findPotentialMatches(censusData, { givenName, surname });
+        if (matches.length > 0) {
+          setShowAISuggestion(true);
+          setAISuggestionName(`${givenName} ${surname}`.trim());
+        } else {
+          setShowAISuggestion(false);
+        }
+      } else {
+        setShowAISuggestion(false);
+      }
+    } else {
+      setShowAISuggestion(false);
+    }
+  }, [formData.names, state, censusData, onShowFindDetails, currentApproach]);
 
   // Reset formData when entering edit or add mode
   useEffect(() => {
@@ -220,6 +251,7 @@ export const EssentialInformationCard = ({
   const renderAddEditState = () => {
     const hasNameData = formData.names[0].givenName || formData.names[0].surname;
 
+    // Show regular form (manual entry or editing)
     return (
       <>
         {/* Primary Toggle */}
@@ -262,6 +294,44 @@ export const EssentialInformationCard = ({
               value={formData.names[0].surname}
               onChange={(e) => updateNameField(0, 'surname', e.target.value)}
             />
+          </div>
+        )}
+
+        {/* AI Suggestion Card */}
+        {showAISuggestion && (
+          <div style={{ marginBottom: spacing.xs }}>
+            <Card variant="outlined" size="xxs">
+              <ListItem
+                heading="AI Auto Fill"
+                subheading="Use AI to find the details from the transcript"
+                startElement={
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: colors.purple.purple05,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <HelpAi size="sm" style={{ color: colors.purple.purple70 }} />
+                  </div>
+                }
+                endIcon={
+                  <ArrowCaret direction="forward" size="sm" style={{ color: colors.blue.blue70 }} />
+                }
+                dense
+                onClick={() => {
+                  if (onShowFindDetails) {
+                    onShowFindDetails({
+                      givenName: formData.names[0].givenName,
+                      surname: formData.names[0].surname
+                    });
+                  }
+                }}
+              />
+            </Card>
           </div>
         )}
 
@@ -565,5 +635,9 @@ EssentialInformationCard.propTypes = {
   onCancel: PropTypes.func,
   onNext: PropTypes.func,
   onEdit: PropTypes.func,
-  isNewRecord: PropTypes.bool
+  isNewRecord: PropTypes.bool,
+  onShowFindDetails: PropTypes.func,
+  onShowAISelection: PropTypes.func,
+  censusData: PropTypes.object,
+  currentApproach: PropTypes.oneOf(['A', 'B'])
 };

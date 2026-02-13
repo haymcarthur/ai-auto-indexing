@@ -6,9 +6,17 @@ export default defineConfig({
   server: {
     port: 3004,
     open: false,
-    strictPort: true
+    strictPort: true,
+    watch: {
+      // Watch ux-zion-library for changes
+      ignored: ['!**/ux-zion-library/**']
+    }
   },
   preview: {
     port: 3004
+  },
+  optimizeDeps: {
+    // Force Vite to always use fresh ux-zion-library source files
+    exclude: ['ux-zion-library']
   }
 })

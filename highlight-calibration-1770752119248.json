@@ -1,0 +1,203 @@
+{
+  "calibrationDate": "2026-02-10T19:35:19.248Z",
+  "imageFile": "KentuckyCensusRecords.jpg",
+  "imageDimensions": {
+    "width": 2000,
+    "height": 2618
+  },
+  "highlightCoordinates": {
+    "1:1:X7YY-NPRG": {
+      "id": "1:1:X7YY-NPRG",
+      "x": 449,
+      "y": 931,
+      "width": 64,
+      "height": 30,
+      "selectable": true
+    },
+    "1:1:X7YY-L4QZ": {
+      "id": "1:1:X7YY-L4QZ",
+      "x": 299,
+      "y": 881,
+      "width": 160,
+      "height": 31,
+      "selectable": true
+    },
+    "1:1:X7YY-2TSX": {
+      "id": "1:1:X7YY-2TSX",
+      "x": 450,
+      "y": 1031,
+      "width": 80,
+      "height": 35,
+      "selectable": true
+    },
+    "1:1:X7YY-NPRB": {
+      "id": "1:1:X7YY-NPRB",
+      "x": 450,
+      "y": 1082,
+      "width": 80,
+      "height": 39,
+      "selectable": true
+    },
+    "1:1:X7YY-2TSF": {
+      "id": "1:1:X7YY-2TSF",
+      "x": 451,
+      "y": 1131,
+      "width": 127,
+      "height": 39,
+      "selectable": true
+    },
+    "1:1:X7YY-2TS6": {
+      "id": "1:1:X7YY-2TS6",
+      "x": 450,
+      "y": 980,
+      "width": 70,
+      "height": 34,
+      "selectable": true
+    },
+    "1:1:X7YY-L4QH": {
+      "id": "1:1:X7YY-L4QH",
+      "x": 287,
+      "y": 630,
+      "width": 164,
+      "height": 36,
+      "selectable": true
+    },
+    "1:1:X7YY-YYWV": {
+      "id": "1:1:X7YY-YYWV",
+      "x": 333,
+      "y": 1797,
+      "width": 75,
+      "height": 34,
+      "selectable": true
+    },
+    "1:1:X7YY-B92V": {
+      "id": "1:1:X7YY-B92V",
+      "x": 324,
+      "y": 1898,
+      "width": 53,
+      "height": 37,
+      "selectable": true
+    },
+    "1:1:X7YY-R2VS": {
+      "id": "1:1:X7YY-R2VS",
+      "x": 321,
+      "y": 1849,
+      "width": 85,
+      "height": 37,
+      "selectable": true
+    },
+    "1:1:X7YY-R2V3": {
+      "id": "1:1:X7YY-R2V3",
+      "x": 388,
+      "y": 2004,
+      "width": 77,
+      "height": 36,
+      "selectable": true
+    },
+    "1:1:X7YY-TD5Y-1": {
+      "id": "1:1:X7YY-TD5Y",
+      "x": 752,
+      "y": 2064,
+      "width": 166,
+      "height": 38,
+      "selectable": true
+    },
+    "1:1:X7YY-TD5Y-2": {
+      "id": "1:1:X7YY-TD5Y",
+      "x": 527,
+      "y": 2235,
+      "width": 179,
+      "height": 48,
+      "selectable": true
+    },
+    "1:1:X7YY-B92N-1": {
+      "id": "1:1:X7YY-B92N",
+      "x": 298,
+      "y": 1689,
+      "width": 151,
+      "height": 42,
+      "selectable": true
+    },
+    "1:1:X7YY-B92N-2": {
+      "id": "1:1:X7YY-B92N",
+      "x": 300,
+      "y": 2175,
+      "width": 176,
+      "height": 44,
+      "selectable": true
+    },
+    "1:1:X7YY-TD5R": {
+      "id": "1:1:X7YY-TD5R",
+      "x": 403,
+      "y": 1953,
+      "width": 72,
+      "height": 35,
+      "selectable": true
+    },
+    "1:1:X7YY-B92J": {
+      "id": "1:1:X7YY-B92J",
+      "x": 342,
+      "y": 1747,
+      "width": 69,
+      "height": 37,
+      "selectable": true
+    },
+    "1:1:X7YY-YYWX": {
+      "id": "1:1:X7YY-YYWX",
+      "x": 389,
+      "y": 1465,
+      "width": 108,
+      "height": 35,
+      "selectable": true
+    },
+    "1:1:X7YY-B923": {
+      "id": "1:1:X7YY-B923",
+      "x": 406,
+      "y": 1307,
+      "width": 68,
+      "height": 40,
+      "selectable": true
+    },
+    "1:1:X7YY-R2JY": {
+      "id": "1:1:X7YY-R2JY",
+      "x": 387,
+      "y": 1514,
+      "width": 89,
+      "height": 37,
+      "selectable": true
+    },
+    "1:1:X7YY-TD5K": {
+      "id": "1:1:X7YY-TD5K",
+      "x": 411,
+      "y": 1362,
+      "width": 75,
+      "height": 33,
+      "selectable": true
+    },
+    "1:1:X7YY-B92S": {
+      "id": "1:1:X7YY-B92S",
+      "x": 303,
+      "y": 1254,
+      "width": 174,
+      "height": 40,
+      "selectable": true
+    },
+    "1:1:X7YY-TD5L": {
+      "id": "1:1:X7YY-TD5L",
+      "x": 389,
+      "y": 1571,
+      "width": 58,
+      "height": 33,
+      "selectable": true
+    },
+    "1:1:X7YY-B92Z": {
+      "id": "1:1:X7YY-B92Z",
+      "x": 398,
+      "y": 1417,
+      "width": 99,
+      "height": 27,
+      "selectable": true
+    }
+  },
+  "note": "Multiple highlights per person are numbered with -1, -2, etc. suffix"
+}

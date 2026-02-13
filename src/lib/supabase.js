@@ -3,11 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('Supabase config:', {
-  url: supabaseUrl,
-  hasKey: !!supabaseAnonKey
-});
-
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
@@ -19,12 +14,10 @@ export async function createTestSession() {
   const params = new URLSearchParams(window.location.search);
   const projectStatus = params.get('status') || 'planning';
 
-  console.log('Creating test session with status:', projectStatus);
-
   const { data, error} = await supabase
     .from('test_sessions')
     .insert({
-      test_id: 'index-creation',
+      test_id: 'ai-auto-index',
       started_at: new Date().toISOString(),
       project_status: projectStatus
     })
@@ -36,8 +29,6 @@ export async function createTestSession() {
     throw error;
   }
 
-  console.log('Test session created:', data);
-
   return {
     sessionId: data.id
   };
@@ -48,8 +39,10 @@ export async function createTestSession() {
  * @param {string} sessionId - The test session ID
  * @param {Object} taskData - Task completion data
  * @param {number} taskData.timeSpent - Time spent in seconds
- * @param {boolean} taskData.successful - Whether task was completed successfully
+ * @param {boolean} taskData.selfReportedSuccess - Whether user reported task as successful
+ * @param {boolean} taskData.actualSuccess - Whether task was actually completed successfully (validated)
  * @param {number} taskData.difficulty - Difficulty rating (1-5)
+ * @param {string} taskData.taskId - Task ID (e.g., 'Prompt', 'Highlight', 'A', 'B', etc.)
  */
 export async function saveTaskCompletion(sessionId, taskData) {
   const now = new Date().toISOString();
@@ -59,9 +52,9 @@ export async function saveTaskCompletion(sessionId, taskData) {
     .from('task_completions')
     .insert({
       session_id: sessionId,
-      task_id: 'A',  // Using 'A' to match database constraint
-      self_reported_success: taskData.successful,
-      actual_success: taskData.successful,
+      task_id: taskData.taskId || 'A',  // Use provided taskId or default to 'A'
+      self_reported_success: taskData.selfReportedSuccess ?? taskData.successful ?? false,
+      actual_success: taskData.actualSuccess ?? taskData.successful ?? false,
       difficulty_rating: taskData.difficulty,
       time_spent_seconds: taskData.timeSpent,
       started_at: startedAt,
@@ -109,30 +102,23 @@ export async function saveValidationData(sessionId, validationData) {
 /**
  * Save survey responses from follow-up questions
  * @param {string} sessionId - The test session ID
- * @param {Array<Object>} responses - Array of question responses
+ * @param {Object} surveyData - Survey data with preferredMethod and overallFeedback
  */
-export async function saveSurveyResponses(sessionId, responses) {
-  console.log('[SURVEY] Saving survey responses for session:', sessionId);
-  console.log('[SURVEY] Raw responses:', responses);
-
-  const surveyResponses = responses.map(response => ({
-    session_id: sessionId,
-    question_id: response.questionId,
-    answer: response.answer
-  }));
-
-  console.log('[SURVEY] Formatted survey responses:', surveyResponses);
-
+export async function saveSurveyResponses(sessionId, surveyData) {
+  // Database schema uses specific columns: preferred_method, preference_reason
+  // (same structure as highlights test)
   const { data, error } = await supabase
     .from('survey_responses')
-    .insert(surveyResponses)
-    .select();
-
-  console.log('[SURVEY] Insert result:', { data, error });
+    .insert({
+      session_id: sessionId,
+      preferred_method: surveyData.preferredMethod,
+      preference_reason: surveyData.overallFeedback
+    })
+    .select()
+    .single();
 
   if (error) {
     console.error('Error saving survey responses:', error);
-    console.error('[SURVEY] Error details:', JSON.stringify(error, null, 2));
     throw error;
   }
 
@@ -153,18 +139,12 @@ export async function completeTestSession(sessionId, recordingUrl = null) {
     updateData.recording_url = recordingUrl;
   }
 
-  console.log('[COMPLETE] Attempting to complete session:', sessionId);
-  console.log('[COMPLETE] Update data:', updateData);
-
   const { data, error } = await supabase
     .from('test_sessions')
     .update(updateData)
     .eq('id', sessionId)
     .select()
     .single();
-
-  console.log('[COMPLETE] Update result:', { data, error });
-  console.log('[COMPLETE] Session completed_at after update:', data?.completed_at);
 
   if (error) {
     console.error('Error completing test session:', error);
@@ -181,10 +161,7 @@ export async function completeTestSession(sessionId, recordingUrl = null) {
  * @returns {Promise<string>} The public URL of the uploaded recording
  */
 export async function uploadRecording(recordingBlob, sessionId) {
-  console.log('[UPLOAD] Starting recording upload for session:', sessionId);
-  console.log('[UPLOAD] Recording blob size:', recordingBlob?.size, 'bytes');
-
-  const fileName = `index-creation/${sessionId}_${Date.now()}.webm`;
+  const fileName = `ai-auto-index/${sessionId}_${Date.now()}.webm`;
 
   const { data, error } = await supabase.storage
     .from('test-recordings')
@@ -192,8 +169,6 @@ export async function uploadRecording(recordingBlob, sessionId) {
       contentType: 'video/webm',
       upsert: false
     });
-
-  console.log('[UPLOAD] Upload result:', { data, error });
 
   if (error) {
     console.error('Error uploading recording:', error);
@@ -204,8 +179,6 @@ export async function uploadRecording(recordingBlob, sessionId) {
   const { data: { publicUrl } } = supabase.storage
     .from('test-recordings')
     .getPublicUrl(fileName);
-
-  console.log('[UPLOAD] Public URL generated:', publicUrl);
 
   return publicUrl;
 }
@@ -218,6 +191,5 @@ export async function uploadRecording(recordingBlob, sessionId) {
 export async function updateRecordingPermission(sessionId, granted) {
   // Note: recording_permitted column doesn't exist in the schema
   // This is a no-op for now, but we keep the function for API compatibility
-  console.log('[RECORDING] Recording permission status:', granted, 'for session:', sessionId);
   return { id: sessionId };
 }

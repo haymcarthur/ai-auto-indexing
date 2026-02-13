@@ -25,12 +25,13 @@ import {
  * @param {array} images - Array of image objects with src and alt properties
  * @param {number} initialIndex - Starting image index
  * @param {function} onImageChange - Callback when image changes
+ * @param {function} overlayContent - Optional function that renders overlay content, receives {zoomLevel, panOffset, isDragging, imageRef}
  */
 export const ImageViewer = ({
   images = [],
   initialIndex = 0,
   onImageChange,
-  ...rest
+  overlayContent
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [zoomLevel, setZoomLevel] = useState(1)
@@ -313,8 +314,8 @@ export const ImageViewer = ({
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    flex: rest.style?.flex || '1 1 0',
-    height: rest.style?.height || undefined,
+    flex: '1 1 0',
+    height: undefined,
     minHeight: 0,
     overflow: 'hidden'
   }
@@ -397,7 +398,7 @@ export const ImageViewer = ({
   })
 
   return (
-    <div style={wrapperStyles} {...rest}>
+    <div style={wrapperStyles}>
       {/* Hide scrollbar for webkit browsers */}
       <style>
         {`
@@ -440,6 +441,8 @@ export const ImageViewer = ({
                 draggable={false}
               />
             )}
+            {/* Overlay content - rendered over entire container */}
+            {overlayContent && overlayContent({ zoomLevel, panOffset, isDragging, imageRef })}
           </>
         )}
 
@@ -577,5 +580,6 @@ ImageViewer.propTypes = {
     })
   ).isRequired,
   initialIndex: PropTypes.number,
-  onImageChange: PropTypes.func
+  onImageChange: PropTypes.func,
+  overlayContent: PropTypes.func
 }

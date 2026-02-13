@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { TextField } from "../../ux-zion-library/src/components/TextField";
 import { Button } from "../../ux-zion-library/src/components/Button";
 import { Header } from "../../ux-zion-library/src/components/Header";
+import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
 import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 
 export const AddPersonQuickGlance = ({ fullName, onSave, onCancel }) => {
@@ -26,6 +27,10 @@ export const AddPersonQuickGlance = ({ fullName, onSave, onCancel }) => {
       <Header level="h6" style={{ marginBottom: spacing.xxs }}>
         Add New Person
       </Header>
+
+      <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
+        Add the person's name. You'll add more information about them later.
+      </Paragraph>
 
       <div style={{ marginBottom: spacing.xs }}>
         <TextField

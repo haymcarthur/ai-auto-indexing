@@ -146,6 +146,19 @@ def build_person(person_elem, element_map):
                 relationship = rel_map.get(rel_type, rel_type)
                 break  # Use first relationship found
 
+    # IDs of people whose surnames should be removed (not explicit in document)
+    no_surname_ids = [
+        "1:1:X7YY-NPRG",  # Reamy
+        "1:1:X7YY-2TSX",  # Joseph
+        "1:1:X7YY-NPRB",  # George
+        "1:1:X7YY-2TSF",  # Christopher
+        "1:1:X7YY-2TS6"   # Isaic
+    ]
+
+    # Remove surname if person is in no_surname_ids list
+    if person_id in no_surname_ids:
+        surname = ""
+
     person = {
         "id": person_id,
         "givenName": given_name or "",
@@ -154,6 +167,8 @@ def build_person(person_elem, element_map):
         "sex": sex,
         "age": age,
         "race": race,
+        "isPrimary": False,
+        "isVisible": False,
         "relationships": [],
         "attachedPersons": [],
         "hints": []
@@ -325,6 +340,23 @@ def build_record(record_elem, element_map):
             all_relationships,
             person_map
         )
+
+    # Determine primary person (person with no CHILD role, preferring Ockerman surname and older age)
+    candidates = []
+    for person in people:
+        has_child_role = any(rel.get('role') == 'CHILD' for rel in person.get('relationships', []))
+        if not has_child_role:
+            candidates.append(person)
+
+    if candidates:
+        # Sort candidates: prefer Ockerman surname, then by age (descending)
+        def sort_key(p):
+            has_ockerman = 1 if 'ockerman' in p.get('surname', '').lower() else 0
+            age = int(p.get('age', '0')) if p.get('age', '').isdigit() else 0
+            return (-has_ockerman, -age)  # Negative for descending order
+
+        candidates.sort(key=sort_key)
+        candidates[0]['isPrimary'] = True
 
     # Build relationship graph
     relationship_graph = build_relationship_graph(all_relationships, person_map)

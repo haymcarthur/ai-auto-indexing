@@ -3,6 +3,7 @@ import { Card } from "../../ux-zion-library/src/components/Card";
 import { Button } from "../../ux-zion-library/src/components/Button";
 import { Header } from "../../ux-zion-library/src/components/Header";
 import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
+import { Alert } from "../../ux-zion-library/src/components/Alert";
 import { ContentCheck } from "../../ux-zion-library/src/icons";
 import { colors, transparentColors } from "../../ux-zion-library/src/tokens/colors";
 import { spacing } from "../../ux-zion-library/src/tokens/spacing";
@@ -13,9 +14,11 @@ export const ReviewCard = ({
   remainingPeople = [], // Array of names still needing details
   onSaveAndClose,
   onSaveAndAttach,
-  onSaveAndContinue
+  onSaveAndContinue,
+  onAddPerson,
+  currentApproach = 'A', // 'A' or 'B' - determines which message to show
+  isEditingExistingPerson = false // true when editing existing person in Task B
 }) => {
-  console.log('[ReviewCard] Rendering with state:', state, 'remainingPeople:', remainingPeople);
 
   const getIconConfig = () => {
     if (state === 'add') {
@@ -78,11 +81,27 @@ export const ReviewCard = ({
 
     return (
       <>
-        <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
-          {currentPersonName} is ready to add! If everything looks correct, {hasRemainingPeople
-            ? 'you will now add the details for the following family members:'
-            : 'you can save and attach to tree.'}
-        </Paragraph>
+        {/* Task B (AI flow): Simple message without alert */}
+        {currentApproach === 'B' ? (
+          <Paragraph size="md" style={{ marginBottom: spacing.xs }}>
+            If everything looks correct, you can save and close.
+          </Paragraph>
+        ) : (
+          /* Task A: Alert and detailed message */
+          <>
+            <div style={{ marginBottom: spacing.xs }}>
+              <Alert status="warning" outline>
+                AI can make mistakes, please review to make sure all of the information is correct.
+              </Alert>
+            </div>
+
+            <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
+              {currentPersonName} is ready to add! If everything looks correct, {hasRemainingPeople
+                ? 'you will now add the details for the following family members:'
+                : 'you can save and close or you can add a missing person to this household.'}
+            </Paragraph>
+          </>
+        )}
 
         {hasRemainingPeople && (
           <ul style={{
@@ -106,29 +125,52 @@ export const ReviewCard = ({
           >
             Save and Continue
           </Button>
+        ) : currentApproach === 'B' && isEditingExistingPerson ? (
+          // Task B: Editing existing person - show Save and Close to return to review list
+          <Button
+            variant="blue"
+            emphasis="high"
+            onClick={() => {
+              onSaveAndClose?.();
+            }}
+            fullWidth
+          >
+            Save and Close
+          </Button>
+        ) : currentApproach === 'B' ? (
+          // Task B: Adding new person to record group - show Save and Continue (calls onSaveAndClose to return to review list)
+          <Button
+            variant="blue"
+            emphasis="high"
+            onClick={() => {
+              onSaveAndClose?.();
+            }}
+            fullWidth
+          >
+            Save and Continue
+          </Button>
         ) : (
-          <div style={{ display: 'flex', gap: spacing.nano }}>
+          // Task A: Show Add Person and Save and Close
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.xxs }}>
             <Button
               variant="blue"
               emphasis="medium"
               onClick={() => {
-                console.log('[ReviewCard] Save and Close clicked');
-                onSaveAndClose?.();
+                onAddPerson?.();
               }}
               fullWidth
             >
-              Save and Close
+              Add Person
             </Button>
             <Button
               variant="blue"
               emphasis="high"
               onClick={() => {
-                console.log('[ReviewCard] Save and Attach clicked');
-                onSaveAndAttach?.();
+                onSaveAndClose?.();
               }}
               fullWidth
             >
-              Save and Attach
+              Save and Close
             </Button>
           </div>
         )}
@@ -153,5 +195,8 @@ ReviewCard.propTypes = {
   remainingPeople: PropTypes.arrayOf(PropTypes.string),
   onSaveAndClose: PropTypes.func,
   onSaveAndAttach: PropTypes.func,
-  onSaveAndContinue: PropTypes.func
+  onSaveAndContinue: PropTypes.func,
+  onAddPerson: PropTypes.func,
+  currentApproach: PropTypes.oneOf(['A', 'B']),
+  isEditingExistingPerson: PropTypes.bool
 };

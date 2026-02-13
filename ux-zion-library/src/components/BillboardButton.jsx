@@ -20,6 +20,7 @@ import { elevation } from '../tokens/elevation'
  * @param {component} iconEnd - Optional icon component to display at end
  * @param {boolean} inline - Remove horizontal padding (only applies to low emphasis buttons)
  * @param {boolean} moreLess - Compact more/less button style with 4px horizontal padding and 16px height (only applies to low emphasis buttons)
+ * @param {boolean} fullWidth - Make button take full width of container
  */
 const BillboardButton = React.forwardRef(({
   variant = 'blue',
@@ -32,6 +33,7 @@ const BillboardButton = React.forwardRef(({
   iconEnd: IconEnd,
   inline = false,
   moreLess = false,
+  fullWidth = false,
   ...rest
 }, ref) => {
   // Color variants matching Zion using design tokens
@@ -267,7 +269,7 @@ const BillboardButton = React.forwardRef(({
     border: getBorderStyle(),
     cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease',
-    display: 'inline-flex',
+    display: fullWidth ? 'flex' : 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '6px',
@@ -277,6 +279,7 @@ const BillboardButton = React.forwardRef(({
     verticalAlign: 'middle',
     backgroundColor: getBackgroundColor(),
     color: getTextColor(),
+    ...(fullWidth && { width: '100%' }),
     ...((emphasis === 'high' || emphasis === 'lightHigh') && !disabled && {
       boxShadow: elevation[1]
     })
@@ -341,7 +344,8 @@ BillboardButton.propTypes = {
   iconStart: PropTypes.elementType,
   iconEnd: PropTypes.elementType,
   inline: PropTypes.bool,
-  moreLess: PropTypes.bool
+  moreLess: PropTypes.bool,
+  fullWidth: PropTypes.bool
 }
 
 export { BillboardButton }
