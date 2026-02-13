@@ -107,7 +107,7 @@ export const FindDetailsDialog = ({
           </Paragraph>
 
           <img
-            src="/SearchForName.gif"
+            src="/SearchingForNames.png"
             alt="Searching for names"
             style={{
               maxWidth: '400px',
