@@ -1,8 +1,8 @@
 import React from 'react';
-import { InfoSheet } from '../../../ux-zion-library/src/components/InfoSheet';
-import { Paragraph } from '../../../ux-zion-library/src/components/Paragraph';
-import { Button } from '../../../ux-zion-library/src/components/Button';
-import { colors } from '../../../ux-zion-library/src/tokens/colors';
+import { InfoSheet } from '../../ux-zion-library/src/components/InfoSheet';
+import { Paragraph } from '../../ux-zion-library/src/components/Paragraph';
+import { Button } from '../../ux-zion-library/src/components/Button';
+import { colors } from '../../ux-zion-library/src/tokens/colors';
 
 /**
  * SelectNameInfoSheet - Instruction panel for AI highlight selection mode
