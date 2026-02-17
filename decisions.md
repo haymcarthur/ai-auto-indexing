@@ -1579,6 +1579,23 @@ onSaveAndReturn={(updatedPerson) => {
 - AI people only become visible after user reviews them
 - Prevents name collisions between manual and AI flows
 
-**Status**: ⚠️ Implementation encountering issues with recordId undefined error
+**Status**: ✅ Resolved - recordId undefined fixed, primary event working, household labels correct
 
 **Files**: `src/components/AddNameInfoSheet.jsx` (lines 1327-1328, 1510-1511, 1358)
+
+### 28. Immutable Census Data Updates for Task Independence (2026-02-17)
+**Decision**: Replace all direct mutations with immutable update patterns
+
+**Problem**: Task A and Task B were sharing census data because shallow copies + direct mutations were modifying the original imported JSON
+
+**Solution**:
+- Replace `.push()` with spread operators: `[...array, newItem]`
+- Create new record objects when modifying: `{...record, people: [...record.people, newPerson]}`
+- Rewrite `updateBidirectionalRelationships` to create new person/record/censusData objects
+
+**Rationale**:
+- `{ ...censusData }` creates shallow copy - nested arrays/objects still referenced
+- Direct mutations affect original imported JSON, causing Task B to see Task A's data
+- Immutable patterns ensure each task has independent data
+
+**Files**: `src/components/AddNameInfoSheet.jsx` (lines 1359, 1433, 1703, 521-563)

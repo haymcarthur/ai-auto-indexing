@@ -2,28 +2,36 @@
 
 ## Active Issues (2026-02-17)
 
-### 8. Manual Entry AI Data Leak - IN PROGRESS ⚠️
-**Date Identified**: 2026-02-17 (User testing feedback)
-**Status**: 🔶 Partially fixed, encountering new error
+### 9. Relationships Not Persisting in Manual Flow - ACTIVE ⚠️
+**Date Identified**: 2026-02-17 (Current session)
+**Status**: 🔶 Debugging in progress
 **Location**: AddNameInfoSheet.jsx
 
-**Problem**: When manually adding people (bypassing AI), the system showed AI-extracted data instead of blank forms. Also caused duplicates in Names panel.
+**Problem**: When manually adding people, relationship updates are called but don't persist when loading next person. Console shows `updateBidirectionalRelationships` executing correctly, but loaded person only has 1 relationship instead of multiple.
 
-**Root Cause**: Name-based searches found AI people instead of manually-created temp people with same names.
+**Root Cause**: Unknown - investigating if immutable updates are preserving relationships correctly
 
-**Attempted Solution**:
-1. Added temp ID tracking to remainingPeople
-2. Filter searches by `isVisible: true` to exclude AI data
-3. Filter member existence checks by `isVisible: true`
-4. Set manually-created people to `isVisible: true`
+**Evidence from Console**:
+- `[handleSaveAndContinue] Updating relationship: Reamy ↔ Isaic` ✓ Executes
+- `[handleSaveAndContinue] Loading next person: Isaic` shows `relationshipsCount: 1` ✗ Should be 2
 
-**Current Blocker**: Getting `[handleSaveAndContinue] Could not find record: undefined` error when pressing "Save and Continue" after manually entering first person.
+**Next Steps**: Check if relationship updates are being saved back to updatedCensusData correctly
 
-**Files Modified**: src/components/AddNameInfoSheet.jsx (lines 1327-1328, 1510-1511, 1358, 1413-1427)
+**Files Modified**: src/components/AddNameInfoSheet.jsx (updateBidirectionalRelationships)
 
 ---
 
 ## Recently Resolved (2026-02-17)
+
+### 8. Manual Entry Flow Core Issues - RESOLVED ✅
+**Date Identified**: 2026-02-17 (User testing feedback)
+**Date Resolved**: 2026-02-17 (Same session)
+**Issues Fixed**:
+1. recordId undefined error when creating first person - Fixed by creating record with household members
+2. Primary event data not sharing - Fixed by checking both `cardData.primaryEvent` and `cardData.events.primaryEvent` paths
+3. Household name showing wrong person - Fixed by checking both isPrimary flag and relationship='Primary', first person auto-marked as Primary
+4. Task independence broken - Fixed by replacing all mutations with immutable update patterns
+**Status**: ✅ Core manual entry flow working, primary event sharing correctly, household labels correct
 
 ### 5. Long Loading on Submission - RESOLVED ✅
 **Date Identified**: 2026-02-17 (User testing feedback)
