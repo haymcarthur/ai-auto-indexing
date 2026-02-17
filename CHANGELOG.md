@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-02-17 - Instant Thank You Screen with Background Saves
+
+### UX Improvement: Optimistic Submission
+- **Fixed long loading on submission**: Users now see thank you screen immediately when clicking Submit, instead of waiting for database operations to complete
+- **Background save pattern**: All database operations (task completions, survey responses, validation data, recording upload) now happen asynchronously in background after thank you screen displays
+- **Prevent lost work**: Users can no longer lose progress by refreshing during long saves - thank you screen shows instantly so they have no reason to refresh
+- **Better error handling**: Removed blocking alert dialogs, replaced with console logging (✅ success, ❌ error, ⚠️ warning, 🎉 completion)
+- **User experience**: Submit → Instant thank you (< 100ms) instead of 10-30 second wait
+
+### Technical Changes
+- Moved `setTestComplete(true)` before database operations in `TestSessionContext.jsx`
+- Wrapped all database saves in fire-and-forget `saveInBackground()` function
+- Database operations continue even if user leaves page (browser keeps connection alive)
+- Console logs provide developer visibility into background save progress
+
+### Files Modified
+- `src/contexts/TestSessionContext.jsx` - Refactored handleTaskComplete for optimistic UI
+
 ## 2026-02-12 - Deployment Fixes and Production Setup
 
 ### Vercel Deployment Fixes

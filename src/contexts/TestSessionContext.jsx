@@ -56,7 +56,8 @@ export function TestSessionProvider({ children }) {
   // Handle task completion with survey responses (called when user completes all questions)
   const handleTaskComplete = useCallback(async (task1CensusData, task2CensusData, validateTask, allResponses) => {
     if (!sessionId) {
-      alert('Error: No session ID found. Please refresh and try again.');
+      console.error('No session ID found');
+      setTestComplete(true); // Show thank you screen anyway
       return;
     }
 
@@ -66,155 +67,149 @@ export function TestSessionProvider({ children }) {
 
     setIsSubmitting(true);
 
-    try {
-      // Calculate time spent
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000); // in seconds
+    // Calculate time spent and validate immediately
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000); // in seconds
+    const task1ValidationResults = validateTask(task1CensusData);
+    const task2ValidationResults = validateTask(task2CensusData);
 
-      // Validate BOTH tasks separately
-      const task1ValidationResults = validateTask(task1CensusData);
-      const task2ValidationResults = validateTask(task2CensusData);
+    // Extract responses from new structure
+    const { task1, task2, final, taskOrder } = allResponses;
 
-      // Extract responses from new structure
-      const { task1, task2, final, taskOrder } = allResponses;
+    // Stop recording and capture blob immediately
+    recording.stopRecording();
 
-      // Parse task1 responses
-      const task1Success = task1?.find(r => r.questionId.includes('success'))?.answer;
-      const task1Difficulty = parseInt(task1?.find(r => r.questionId.includes('difficulty'))?.answer || '3');
-      const task1Method = task1?.[0]?.method; // 'Prompt' or 'Highlight'
+    // IMMEDIATELY show thank you screen - don't make user wait for database operations
+    setTestComplete(true);
+    setIsSubmitting(false);
 
-      // Parse task2 responses
-      const task2Success = task2?.find(r => r.questionId.includes('success'))?.answer;
-      const task2Difficulty = parseInt(task2?.find(r => r.questionId.includes('difficulty'))?.answer || '3');
-      const task2Method = task2?.[0]?.method; // 'Prompt' or 'Highlight'
+    // Do all database operations in the background (non-blocking)
+    // User already sees thank you screen, so they won't retry or refresh
+    const saveInBackground = async () => {
+      try {
+        // Wait a moment for recording to finalize
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Parse final responses
-      const preferredMethod = final?.find(r => r.questionId === 'preferred-method')?.answer;
-      const overallFeedback = final?.find(r => r.questionId === 'overall-feedback')?.answer;
+        const isMockSession = sessionId.startsWith('mock-');
 
-      // Stop recording
-      recording.stopRecording();
+        if (isMockSession) {
+          console.log('Mock session - skipping database saves');
+          return;
+        }
 
-      // Wait a moment for recording to finalize
-      await new Promise(resolve => setTimeout(resolve, 1000));
+        // Parse responses
+        const task1Success = task1?.find(r => r.questionId.includes('success'))?.answer;
+        const task1Difficulty = parseInt(task1?.find(r => r.questionId.includes('difficulty'))?.answer || '3');
+        const task1Method = task1?.[0]?.method; // 'Prompt' or 'Highlight'
 
-      // Save to database (with error handling to not block completion)
-      const isMockSession = sessionId.startsWith('mock-');
+        const task2Success = task2?.find(r => r.questionId.includes('success'))?.answer;
+        const task2Difficulty = parseInt(task2?.find(r => r.questionId.includes('difficulty'))?.answer || '3');
+        const task2Method = task2?.[0]?.method; // 'Prompt' or 'Highlight'
 
-      if (!isMockSession) {
-        // Determine actual success for EACH task based on separate validations
+        const preferredMethod = final?.find(r => r.questionId === 'preferred-method')?.answer;
+        const overallFeedback = final?.find(r => r.questionId === 'overall-feedback')?.answer;
+
+        // Determine actual success for EACH task
         const task1ActualSuccess = task1ValidationResults.allPeopleAdded || false;
         const task2ActualSuccess = task2ValidationResults.allPeopleAdded || false;
 
-        let recordingUrl = null;
-
-        // Collect any errors to report to user
-        const errors = [];
-
         // Map method names to database-compatible task IDs
-        // Database constraint only allows 'A', 'B', 'C'
         const mapMethodToTaskId = (method) => {
           if (method === 'Prompt') return 'A';
           if (method === 'Highlight') return 'B';
-          return method; // fallback
+          return method;
         };
 
-        // Save Task 1 completion with Task 1's validation results
+        // Save Task 1 completion
         try {
           const task1SelfReported = task1Success === 'yes';
           const task1MappedId = mapMethodToTaskId(task1Method);
           await saveTaskCompletion(sessionId, {
-            timeSpent: Math.floor(timeSpent / 2), // Approximate half time for task 1
+            timeSpent: Math.floor(timeSpent / 2),
             selfReportedSuccess: task1SelfReported,
-            actualSuccess: task1ActualSuccess, // Use Task 1's validation result
+            actualSuccess: task1ActualSuccess,
             difficulty: task1Difficulty,
-            taskId: task1MappedId // Map 'Prompt' → 'A', 'Highlight' → 'B'
+            taskId: task1MappedId
           });
+          console.log('✅ Task 1 saved successfully');
         } catch (error) {
-          console.error('Error saving Task 1:', error);
-          errors.push(`Task 1: ${error.message}`);
+          console.error('❌ Error saving Task 1:', error);
         }
 
-        // Save Task 2 completion with Task 2's validation results
+        // Save Task 2 completion
         try {
           const task2SelfReported = task2Success === 'yes';
           const task2MappedId = mapMethodToTaskId(task2Method);
           await saveTaskCompletion(sessionId, {
-            timeSpent: Math.floor(timeSpent / 2), // Approximate half time for task 2
+            timeSpent: Math.floor(timeSpent / 2),
             selfReportedSuccess: task2SelfReported,
-            actualSuccess: task2ActualSuccess, // Use Task 2's validation result
+            actualSuccess: task2ActualSuccess,
             difficulty: task2Difficulty,
-            taskId: task2MappedId // Map 'Prompt' → 'A', 'Highlight' → 'B'
+            taskId: task2MappedId
           });
+          console.log('✅ Task 2 saved successfully');
         } catch (error) {
-          console.error('Error saving Task 2:', error);
-          errors.push(`Task 2: ${error.message}`);
+          console.error('❌ Error saving Task 2:', error);
         }
 
-        // Save survey responses to survey_responses table
+        // Save survey responses
         try {
-          // Only save if we have valid responses
           if (preferredMethod && overallFeedback) {
-            // Map preferred method to database-compatible value
             const mappedPreferredMethod = mapMethodToTaskId(preferredMethod);
-
             await saveSurveyResponses(sessionId, {
-              preferredMethod: mappedPreferredMethod, // Map 'Prompt' → 'A', 'Highlight' → 'B'
+              preferredMethod: mappedPreferredMethod,
               overallFeedback: overallFeedback
             });
+            console.log('✅ Survey responses saved successfully');
           } else {
-            errors.push('Survey responses missing');
+            console.warn('⚠️ Survey responses missing');
           }
         } catch (error) {
-          console.error('Error saving survey responses:', error);
-          errors.push(`Survey: ${error.message}`);
+          console.error('❌ Error saving survey responses:', error);
         }
 
-        // Show errors to user if any occurred
-        if (errors.length > 0) {
-          console.error('SAVE ERRORS:', errors);
-          alert('Some data may not have been saved:\n' + errors.join('\n'));
-        }
-
-        // Save validation data with all survey responses included in JSON
+        // Save validation data
         try {
           const validationDataWithResponses = {
             task1Validation: task1ValidationResults,
             task2Validation: task2ValidationResults,
-            surveyResponses: [...task1, ...task2, ...final] // Include all survey responses in the JSON
+            surveyResponses: [...task1, ...task2, ...final]
           };
           await saveValidationData(sessionId, validationDataWithResponses);
+          console.log('✅ Validation data saved successfully');
         } catch (error) {
-          console.error('Error saving validation data:', error);
+          console.error('❌ Error saving validation data:', error);
         }
 
-        // Upload recording if available
+        // Upload recording
+        let recordingUrl = null;
         const recordingBlob = recording.getRecordingBlob();
-
         if (recordingBlob) {
           try {
             recordingUrl = await uploadRecording(recordingBlob, sessionId);
-          } catch (uploadError) {
-            console.error('Failed to upload recording:', uploadError);
+            console.log('✅ Recording uploaded successfully');
+          } catch (error) {
+            console.error('❌ Failed to upload recording:', error);
           }
         }
 
-        // ALWAYS complete session, even if some saves failed
+        // Complete session
         try {
           await completeTestSession(sessionId, recordingUrl);
+          console.log('✅ Test session completed successfully');
         } catch (error) {
-          console.error('Error completing test session:', error);
-          alert('Warning: Your responses may not have been saved. Please contact support.');
+          console.error('❌ Error completing test session:', error);
         }
+
+        console.log('🎉 All background saves completed');
+
+      } catch (error) {
+        console.error('❌ Background save process failed:', error);
       }
+    };
 
-      setTestComplete(true);
+    // Fire and forget - don't await this
+    saveInBackground();
 
-    } catch (error) {
-      console.error('Failed to complete test:', error);
-      alert('There was an error submitting your responses. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
   }, [sessionId, startTime, recording, isSubmitting]);
 
   const value = {
