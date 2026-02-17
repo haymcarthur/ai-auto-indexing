@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-02-17 - Manual Entry Fixes (Session Continuation)
+
+### Fixed Primary Event Data Population ✅
+- **Primary event now sharing correctly**: Events card date/place now pre-fills for all household members
+- **Implementation**: Check both `cardData.primaryEvent` and `cardData.events.primaryEvent` paths when creating record
+
+### Fixed Household Labels and Primary Person Detection ✅
+- **Household name now correct**: Shows "John Ockerman Household" instead of wrong person's name
+- **First person automatically Primary**: When creating new household, first person marked with isPrimary=true and relationship='Primary'
+
+### Task Independence Fixed ✅
+- **Immutable census data updates**: All array/object mutations replaced with immutable patterns
+- **updateBidirectionalRelationships rewritten**: Fully immutable - creates new person/record/censusData objects
+- **Task A/B no longer share data**: Each task now has separate census data
+
+### Fixed Relationships Persistence ✅
+- **Relationships now persisting correctly**: When manually adding household members, relationships update bidirectionally and persist when loading next person
+- **Implementation**: Added `isVisible: true` filter when searching for household members to update relationships, preventing matches to AI-extracted people with same names
+
+### UX Improvements - SelectNameInfoSheet ✅
+- **Clearer instructions for Method B AI extraction**: Added H5 heading "Select a Highlight" and revised paragraph text to guide users
+- **De-emphasized manual entry**: Changed "Enter Name Manually" button from medium to low emphasis to encourage highlight selection first
+
+### Files Modified
+- `src/components/AddNameInfoSheet.jsx` - Visibility filtering in relationship updates, removed debug logging
+- `src/components/RecordGroupCard.jsx` - Fixed PropType warning with Boolean() wrapper
+- `src/components/SelectNameInfoSheet.jsx` - H5 heading, updated instructions, low-emphasis button
+
+---
+
 ## 2026-02-17 - Read-Only Household Member Names
 
 ### Bug Fix: Prevent Accidental Duplicate Creation

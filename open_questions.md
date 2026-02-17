@@ -1,27 +1,16 @@
 # Open Questions & Issues
 
-## Active Issues (2026-02-17)
-
-### 9. Relationships Not Persisting in Manual Flow - ACTIVE ⚠️
-**Date Identified**: 2026-02-17 (Current session)
-**Status**: 🔶 Debugging in progress
-**Location**: AddNameInfoSheet.jsx
-
-**Problem**: When manually adding people, relationship updates are called but don't persist when loading next person. Console shows `updateBidirectionalRelationships` executing correctly, but loaded person only has 1 relationship instead of multiple.
-
-**Root Cause**: Unknown - investigating if immutable updates are preserving relationships correctly
-
-**Evidence from Console**:
-- `[handleSaveAndContinue] Updating relationship: Reamy ↔ Isaic` ✓ Executes
-- `[handleSaveAndContinue] Loading next person: Isaic` shows `relationshipsCount: 1` ✗ Should be 2
-
-**Next Steps**: Check if relationship updates are being saved back to updatedCensusData correctly
-
-**Files Modified**: src/components/AddNameInfoSheet.jsx (updateBidirectionalRelationships)
-
----
-
 ## Recently Resolved (2026-02-17)
+
+### 9. Relationships Not Persisting in Manual Flow - RESOLVED ✅
+**Date Identified**: 2026-02-17 (Current session)
+**Date Resolved**: 2026-02-17 (Same session)
+**Location**: AddNameInfoSheet.jsx
+**Issue**: When manually adding people, relationship updates were called but didn't persist when loading next person. Updates were being applied to AI-extracted people instead of manually-created temp people.
+**Root Cause**: When searching for household members to update relationships, code was matching by name without filtering by `isVisible: true`, finding AI-extracted people instead of manually-created temp people.
+**Solution**: Added `isVisible: true` filter when searching for household members (line 1536), ensuring relationships update for correct people.
+**Files Modified**: src/components/AddNameInfoSheet.jsx (lines 1534-1537)
+**Status**: ✅ Relationships now persist correctly across manual entry flow
 
 ### 8. Manual Entry Flow Core Issues - RESOLVED ✅
 **Date Identified**: 2026-02-17 (User testing feedback)

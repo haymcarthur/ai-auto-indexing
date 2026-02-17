@@ -1,6 +1,7 @@
 import React from 'react';
 import { InfoSheet } from '../../ux-zion-library/src/components/InfoSheet';
 import { Paragraph } from '../../ux-zion-library/src/components/Paragraph';
+import { Header } from '../../ux-zion-library/src/components/Header';
 import { Button } from '../../ux-zion-library/src/components/Button';
 import { colors } from '../../ux-zion-library/src/tokens/colors';
 
@@ -34,6 +35,15 @@ export const SelectNameInfoSheet = ({ onCancel, onAddManually }) => {
         }}
       />
 
+      <Header
+        level="h5"
+        style={{
+          marginBottom: '12px'
+        }}
+      >
+        Select a Highlight
+      </Header>
+
       <Paragraph
         size="md"
         style={{
@@ -41,14 +51,14 @@ export const SelectNameInfoSheet = ({ onCancel, onAddManually }) => {
           lineHeight: '1.6'
         }}
       >
-        Select the highlighted name on the document that you would like to add.
+        Select a highlight on the document for one of the names you would like to add. If the name does not have a highlight you can add it manually.
       </Paragraph>
 
       <Button
         onClick={onAddManually}
         size="md"
         variant="blue"
-        emphasis="medium"
+        emphasis="low"
       >
         Enter Name Manually
       </Button>

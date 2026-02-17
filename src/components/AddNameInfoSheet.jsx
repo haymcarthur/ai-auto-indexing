@@ -518,12 +518,12 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       return censusData;
     }
 
-    // Ensure relationships arrays exist
-    if (!personA.relationships) personA.relationships = [];
-    if (!personB.relationships) personB.relationships = [];
+    // Create new person objects with updated relationships (immutable)
+    const personARelationships = personA.relationships || [];
+    const personBRelationships = personB.relationships || [];
 
     // Update person A's relationship to person B
-    const existingRelAtoB = personA.relationships.findIndex(r => r.relatedPersonId === personBId);
+    const existingRelAtoB = personARelationships.findIndex(r => r.relatedPersonId === personBId);
     const newRelAtoB = {
       type: relationshipType,
       role: relationshipAtoB.toUpperCase(),
@@ -531,14 +531,12 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       relatedPersonName: personBName
     };
 
-    if (existingRelAtoB >= 0) {
-      personA.relationships[existingRelAtoB] = newRelAtoB;
-    } else {
-      personA.relationships.push(newRelAtoB);
-    }
+    const updatedPersonARelationships = existingRelAtoB >= 0
+      ? personARelationships.map((r, i) => i === existingRelAtoB ? newRelAtoB : r)
+      : [...personARelationships, newRelAtoB];
 
     // Update person B's relationship to person A (inverse)
-    const existingRelBtoA = personB.relationships.findIndex(r => r.relatedPersonId === personAId);
+    const existingRelBtoA = personBRelationships.findIndex(r => r.relatedPersonId === personAId);
     const newRelBtoA = {
       type: relationshipType,
       role: inverseRelationship.toUpperCase(),
@@ -546,18 +544,36 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       relatedPersonName: personAName
     };
 
-    if (existingRelBtoA >= 0) {
-      personB.relationships[existingRelBtoA] = newRelBtoA;
-    } else {
-      personB.relationships.push(newRelBtoA);
-    }
+    const updatedPersonBRelationships = existingRelBtoA >= 0
+      ? personBRelationships.map((r, i) => i === existingRelBtoA ? newRelBtoA : r)
+      : [...personBRelationships, newRelBtoA];
 
-    // Return updated census data
+    // Create new person objects
+    const updatedPersonA = { ...personA, relationships: updatedPersonARelationships };
+    const updatedPersonB = { ...personB, relationships: updatedPersonBRelationships };
+
+    // Create new record objects with updated people
+    const updatedRecordWithA = {
+      ...recordWithA,
+      people: recordWithA.people.map(p => p.id === personAId ? updatedPersonA : p)
+    };
+
+    const updatedRecordWithB = recordWithA.id === recordWithB.id
+      ? {
+          ...updatedRecordWithA,
+          people: updatedRecordWithA.people.map(p => p.id === personBId ? updatedPersonB : p)
+        }
+      : {
+          ...recordWithB,
+          people: recordWithB.people.map(p => p.id === personBId ? updatedPersonB : p)
+        };
+
+    // Return updated census data with new record objects
     return {
       ...censusData,
       records: censusData.records.map(r => {
-        if (r.id === recordWithA.id) return recordWithA;
-        if (recordWithB && r.id === recordWithB.id) return recordWithB;
+        if (r.id === recordWithA.id) return updatedRecordWithA;
+        if (recordWithB && r.id === recordWithB.id) return updatedRecordWithB;
         return r;
       })
     };
@@ -1272,7 +1288,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
     let censusDataWasUpdated = false;
 
     // FIRST: Update the CURRENT person in censusData with their edited information
-    const currentPersonId = cardData.essentialInfo?.originalPersonId;
+    let currentPersonId = cardData.essentialInfo?.originalPersonId;
     const currentPersonGivenName = cardData.essentialInfo?.names?.[0]?.givenName || '';
     const currentPersonSurname = cardData.essentialInfo?.names?.[0]?.surname || '';
     const currentPersonFullName = `${currentPersonGivenName} ${currentPersonSurname}`.trim() || currentPersonGivenName;
@@ -1311,7 +1327,68 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
     }
 
     // Check if there are new people in Record Group that need to be added to censusData
-    const recordId = cardData.recordGroup?.existingRecordId;
+    let recordId = cardData.recordGroup?.existingRecordId;
+
+    // If no record exists yet (first person in new household), create one
+    if (!recordId && cardData.recordGroup?.members && cardData.recordGroup.members.length > 0) {
+      const newRecordId = `1:2:${Date.now()}`;
+      const primaryEvent = cardData.primaryEvent || cardData.events?.primaryEvent || {};
+
+      const newRecord = {
+        id: newRecordId,
+        recordType: primaryEvent.type || 'Census',
+        date: primaryEvent.date || '',
+        place: primaryEvent.place || '',
+        people: []
+      };
+
+      // Add the CURRENT person to the new record first
+      // IMPORTANT: First person in new household should be Primary
+      const isFirstPersonInHousehold = true;
+      const currentPersonForRecord = {
+        id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        givenName: currentPersonGivenName,
+        surname: currentPersonSurname,
+        relationship: isFirstPersonInHousehold ? 'Primary' : (cardData.essentialInfo.isPrimary ? 'Primary' : 'Other'),
+        sex: cardData.essentialInfo.sex || '',
+        age: cardData.essentialInfo.age || '',
+        race: cardData.essentialInfo.race || '',
+        isPrimary: isFirstPersonInHousehold ? true : (cardData.essentialInfo.isPrimary || false),
+        isVisible: true,
+        relationships: [],
+        attachedPersons: [],
+        hints: []
+      };
+
+      newRecord.people.push(currentPersonForRecord);
+
+      // Store the temp ID so we can use it for relationships
+      const newCurrentPersonId = currentPersonForRecord.id;
+      if (!currentPersonId) {
+        // Update cardData with the temp ID for relationship linking
+        if (cardData.essentialInfo) {
+          cardData.essentialInfo.originalPersonId = newCurrentPersonId;
+        }
+        // Also update the local variable for use in subsequent code
+        currentPersonId = newCurrentPersonId;
+      }
+
+      // Add the new record to census data (immutable)
+      updatedCensusData = {
+        ...updatedCensusData,
+        records: [...updatedCensusData.records, newRecord]
+      };
+      censusDataWasUpdated = true;
+
+      // Update cardData and recordId so the rest of the code uses this record
+      if (cardData.recordGroup) {
+        cardData.recordGroup.existingRecordId = newRecordId;
+      }
+      recordId = newRecordId;
+
+      console.log('[handleSaveAndContinue] Created new record and added current person:', newRecordId, currentPersonFullName);
+    }
+
     if (recordId && cardData.recordGroup?.members) {
       const record = updatedCensusData.records.find(r => r.id === recordId);
       if (record) {
@@ -1321,8 +1398,12 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         // are already declared above (before updating current person in censusData)
 
         // Find members that don't exist in census data yet
+        // IMPORTANT: Only check visible people to avoid conflicts with AI-extracted people
         cardData.recordGroup.members.forEach(member => {
           const memberExists = record.people.some(p => {
+            // Skip non-visible people (AI-extracted data not yet reviewed)
+            if (p.isVisible !== true) return false;
+
             const personName = `${p.givenName} ${p.surname}`.trim() || p.givenName;
             return personName === member.name;
           });
@@ -1355,7 +1436,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
               age: '',
               race: '',
               isPrimary: false,
-              isVisible: false,
+              isVisible: true, // Make visible so they appear in Names panel
               relationships: relationships,
               attachedPersons: [],
               hints: []
@@ -1365,16 +1446,19 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           }
         });
 
-        // Add new people to the record
+        // Add new people to the record (immutable - create new record object)
         if (newPeopleToAdd.length > 0) {
-          record.people.push(...newPeopleToAdd);
+          const updatedRecord = {
+            ...record,
+            people: [...record.people, ...newPeopleToAdd]
+          };
 
           // Update census data
           updatedCensusData = {
             ...updatedCensusData,
             records: updatedCensusData.records.map(r => {
               if (r.id === recordId) {
-                return record;
+                return updatedRecord;
               }
               return r;
             })
@@ -1409,6 +1493,22 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
             }
           });
           censusDataWasUpdated = true;
+
+          // CRITICAL: Update remainingPeople with temp IDs so we can find them by ID later
+          setRemainingPeople(prev => prev.map(person => {
+            if (typeof person === 'object' && !person.id) {
+              // Find the corresponding temp person we just created
+              const personFullName = `${person.givenName} ${person.surname || ''}`.trim();
+              const tempPerson = newPeopleToAdd.find(tp => {
+                const tpFullName = `${tp.givenName} ${tp.surname || ''}`.trim();
+                return tpFullName === personFullName;
+              });
+              if (tempPerson) {
+                return { ...person, id: tempPerson.id };
+              }
+            }
+            return person;
+          }));
         }
 
         // ALSO update bidirectional relationships for ALL members (including newly created ones)
@@ -1416,10 +1516,12 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         if (currentPersonId && cardData.recordGroup?.members) {
 
           cardData.recordGroup.members.forEach(member => {
-            // Find the member's ID in census data
+            // Find the member's ID in census data (only search visible people to avoid AI-extracted duplicates)
             let memberId = null;
             for (const rec of updatedCensusData.records) {
               const memberPerson = rec.people.find(p => {
+                // Only match people who are visible (manually created or already reviewed)
+                if (p.isVisible !== true) return false;
                 const pName = `${p.givenName} ${p.surname}`.trim();
                 return pName === member.name;
               });
@@ -1448,6 +1550,8 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
                 inverseRel
               );
               censusDataWasUpdated = true;
+            } else {
+              console.warn(`[handleSaveAndContinue] Could not find member ID for:`, member.name);
             }
           });
         }
@@ -1470,6 +1574,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
     let nextPersonNameStr;
     let nextPersonGivenName;
     let nextPersonSurname;
+    let nextPersonId = null;
 
     if (typeof nextPersonName === 'string') {
       nextPersonNameStr = nextPersonName;
@@ -1478,10 +1583,11 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       nextPersonGivenName = parts[0] || '';
       nextPersonSurname = parts.slice(1).join(' ') || '';
     } else {
-      // It's an object with givenName and surname
+      // It's an object with givenName and surname (and possibly id)
       nextPersonGivenName = nextPersonName.givenName || '';
       nextPersonSurname = nextPersonName.surname || '';
       nextPersonNameStr = `${nextPersonGivenName} ${nextPersonSurname}`.trim() || nextPersonGivenName;
+      nextPersonId = nextPersonName.id || null; // Store temp ID if available
     }
 
 
@@ -1489,16 +1595,34 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
     let foundPerson = null;
     let foundRecord = null;
 
-    for (const record of updatedCensusData.records) {
-      for (const person of record.people) {
-        const personFullName = `${person.givenName || ''} ${person.surname || ''}`.trim() || person.givenName;
-        if (personFullName === nextPersonNameStr) {
-          foundPerson = person;
+    // FIRST: Try to find by ID if we have one (for manually-created temp people)
+    if (nextPersonId) {
+      for (const record of updatedCensusData.records) {
+        foundPerson = record.people.find(p => p.id === nextPersonId);
+        if (foundPerson) {
           foundRecord = record;
           break;
         }
       }
-      if (foundPerson) break;
+    }
+
+    // SECOND: Fallback to name search if not found by ID (for legacy/string entries or AI people)
+    // IMPORTANT: Only search among visible people to avoid finding AI-extracted people with same name
+    if (!foundPerson) {
+      for (const record of updatedCensusData.records) {
+        for (const person of record.people) {
+          // Only match people who are visible (manually created or already reviewed)
+          if (person.isVisible !== true) continue;
+
+          const personFullName = `${person.givenName || ''} ${person.surname || ''}`.trim() || person.givenName;
+          if (personFullName === nextPersonNameStr) {
+            foundPerson = person;
+            foundRecord = record;
+            break;
+          }
+        }
+        if (foundPerson) break;
+      }
     }
 
     // If not found in census data, this is a new person added via Record Group card
@@ -1536,11 +1660,37 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         return;
       }
 
-      // Create a minimal person object for the new person
-      foundRecord = censusData.records.find(r => r.id === currentRecordId);
-      if (!foundRecord) {
-        console.error('[handleSaveAndContinue] Could not find record:', currentRecordId);
-        return;
+      // If no record exists yet (first person in new household), create one
+      if (!currentRecordId) {
+        const newRecordId = `1:2:${Date.now()}`;
+        const primaryEvent = cardData.primaryEvent || cardData.events?.primaryEvent || {};
+
+        const newRecord = {
+          id: newRecordId,
+          recordType: primaryEvent.type || 'Census',
+          date: primaryEvent.date || '',
+          place: primaryEvent.place || '',
+          people: []
+        };
+
+        // Add the new record to census data
+        updatedCensusData.records.push(newRecord);
+        censusDataWasUpdated = true;
+
+        // Update cardData so subsequent operations use this record
+        if (cardData.recordGroup) {
+          cardData.recordGroup.existingRecordId = newRecordId;
+        }
+
+        foundRecord = newRecord;
+        console.log('[handleSaveAndContinue] Created new record:', newRecordId);
+      } else {
+        // Find existing record
+        foundRecord = updatedCensusData.records.find(r => r.id === currentRecordId);
+        if (!foundRecord) {
+          console.error('[handleSaveAndContinue] Could not find record:', currentRecordId);
+          return;
+        }
       }
 
       // Generate a temporary ID for the new person
@@ -1562,13 +1712,17 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       };
 
 
-      // Add the new person to the record temporarily so they appear in other people's Record Group cards
-      foundRecord.people.push(foundPerson);
+      // Add the new person to the record temporarily (immutable - create new record)
+      const updatedFoundRecord = {
+        ...foundRecord,
+        people: [...foundRecord.people, foundPerson]
+      };
+      foundRecord = updatedFoundRecord; // Update reference for later use
 
-      // Update census data with the new person
-      const updatedCensusData = {
-        ...censusData,
-        records: censusData.records.map(r => {
+      // Update census data with the new person (use updatedCensusData to preserve relationships)
+      const newUpdatedCensusData = {
+        ...updatedCensusData,
+        records: updatedCensusData.records.map(r => {
           if (r.id === foundRecord.id) {
             return foundRecord;
           }
@@ -1578,7 +1732,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
       // Update parent component's census data
       if (onUpdateCensusData) {
-        onUpdateCensusData(updatedCensusData);
+        onUpdateCensusData(newUpdatedCensusData);
       }
 
     }
@@ -1587,10 +1741,13 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
     // Get all people from this record
     const allPeople = foundRecord.people;
 
-    // Find primary person in household
-    const primaryPerson = allPeople.find(p => p.isPrimary) || foundPerson;
+    // Find primary person in household (check both isPrimary flag and relationship='Primary')
+    const primaryPerson = allPeople.find(p => p.isPrimary || p.relationship === 'Primary') || allPeople[0] || foundPerson;
     const primaryFullName = `${primaryPerson.givenName || ''} ${primaryPerson.surname || ''}`.trim() || primaryPerson.givenName || 'Unknown';
     const householdName = primaryFullName + ' Household';
+
+    // Check if this is a manually-created temp person or an AI-extracted person
+    const isTempPerson = foundPerson.id?.startsWith('temp-');
 
     // Auto-populate all cards for next person
     const populatedData = {
@@ -1604,7 +1761,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         sex: foundPerson.sex || '',
         race: foundPerson.race || '',
         age: foundPerson.age || '',
-        originalPersonId: foundPerson.id // Store original ID from AI extraction
+        originalPersonId: foundPerson.id // Store original ID from AI extraction or temp ID
       },
       recordGroup: {
         recordGroup: {
@@ -1632,6 +1789,12 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           }),
         existingRecordId: foundRecord.id
       },
+      // Top-level primaryEvent for Events card
+      primaryEvent: {
+        type: foundRecord.recordType || 'Census',
+        date: foundRecord.date || '',
+        place: foundRecord.place || ''
+      },
       events: {
         primaryEvent: {
           type: 'Census',
@@ -1651,14 +1814,35 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           }] : [])
         ]
       },
+      // Top-level additionalEvents for compatibility
+      additionalEvents: [
+        ...(foundPerson.birthDate || foundPerson.birthPlace ? [{
+          type: 'Birth',
+          date: foundPerson.birthDate || '',
+          place: foundPerson.birthPlace || ''
+        }] : []),
+        ...(foundPerson.deathDate || foundPerson.deathPlace ? [{
+          type: 'Death',
+          date: foundPerson.deathDate || '',
+          place: foundPerson.deathPlace || ''
+        }] : [])
+      ],
       additionalFacts: {
         facts: []
       }
     };
 
-    // Set all cards to review state
-    setCardStates({
-      essentialInfo: 'review',
+    // Set card states based on person type
+    // Temp people (manually created): Start with Essential Info in 'add' mode, others pending
+    // AI people: All cards in 'review' mode
+    setCardStates(isTempPerson ? {
+      essentialInfo: 'add',    // User needs to fill in details manually
+      recordGroup: 'pending',
+      events: 'pending',
+      additionalFacts: 'pending',
+      review: 'pending'
+    } : {
+      essentialInfo: 'review', // AI people get review mode
       recordGroup: 'review',
       events: 'review',
       additionalFacts: 'review',
@@ -1771,10 +1955,13 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
         onUpdateCensusData(updatedCensusData);
       }
-    }
 
-    // Add to remaining people list with separate name parts
-    setRemainingPeople(prev => [...prev, { givenName, surname }]);
+      // Add to remaining people list with separate name parts AND temp ID
+      setRemainingPeople(prev => [...prev, { givenName, surname, id: tempId }]);
+    } else {
+      // No record ID - still add to remaining people without temp ID
+      setRemainingPeople(prev => [...prev, { givenName, surname }]);
+    }
   };
 
   const handleRecordGroupSelected = (recordEventData) => {
@@ -2095,6 +2282,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
             onAddPerson={handleAddPerson}
             currentApproach={currentApproach}
             isEditingExistingPerson={preselectedPerson && !preselectedPerson.isNew}
+            showAIWarning={preselectedPerson && !preselectedPerson.isNew}
           />
         </div>
       </InfoSheet>

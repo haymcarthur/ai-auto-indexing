@@ -472,7 +472,7 @@ export const RecordGroupCard = ({
         {/* Member Relationship Rows */}
         {formData.members?.map((member, index) => {
           // Check if this is an existing visible census name (not just in filtered dropdown)
-          const isExistingCensusName = member.name && allVisibleCensusNames.includes(member.name.toLowerCase());
+          const isExistingCensusName = Boolean(member.name && allVisibleCensusNames.includes(member.name.toLowerCase()));
 
           return (
             <div key={index} style={{ marginBottom: spacing.xs }}>

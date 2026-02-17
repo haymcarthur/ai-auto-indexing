@@ -17,7 +17,8 @@ export const ReviewCard = ({
   onSaveAndContinue,
   onAddPerson,
   currentApproach = 'A', // 'A' or 'B' - determines which message to show
-  isEditingExistingPerson = false // true when editing existing person in Task B
+  isEditingExistingPerson = false, // true when editing existing person in Task B
+  showAIWarning = false // true when reviewing AI-extracted people, false for manual entry
 }) => {
 
   const getIconConfig = () => {
@@ -89,11 +90,14 @@ export const ReviewCard = ({
         ) : (
           /* Task A: Alert and detailed message */
           <>
-            <div style={{ marginBottom: spacing.xs }}>
-              <Alert status="warning" outline>
-                AI can make mistakes, please review to make sure all of the information is correct.
-              </Alert>
-            </div>
+            {/* Only show AI warning if this is an AI-extracted person */}
+            {showAIWarning && (
+              <div style={{ marginBottom: spacing.xs }}>
+                <Alert status="warning" outline>
+                  AI can make mistakes, please review to make sure all of the information is correct.
+                </Alert>
+              </div>
+            )}
 
             <Paragraph size="sm" style={{ marginBottom: spacing.xs }}>
               {currentPersonName} is ready to add! If everything looks correct, {hasRemainingPeople
@@ -198,5 +202,6 @@ ReviewCard.propTypes = {
   onSaveAndContinue: PropTypes.func,
   onAddPerson: PropTypes.func,
   currentApproach: PropTypes.oneOf(['A', 'B']),
-  isEditingExistingPerson: PropTypes.bool
+  isEditingExistingPerson: PropTypes.bool,
+  showAIWarning: PropTypes.bool
 };

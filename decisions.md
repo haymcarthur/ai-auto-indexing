@@ -1570,6 +1570,7 @@ onSaveAndReturn={(updatedPerson) => {
 **Solution**:
 - Filter by `isVisible: true` when searching for people by name
 - Filter by `isVisible: true` when checking if member already exists
+- Filter by `isVisible: true` when finding household members to update relationships
 - Set `isVisible: true` for manually-created temp people
 - AI-extracted people start with `isVisible: false`
 
@@ -1578,10 +1579,11 @@ onSaveAndReturn={(updatedPerson) => {
 - Manually-created people are immediately usable (visible in Names panel)
 - AI people only become visible after user reviews them
 - Prevents name collisions between manual and AI flows
+- Ensures relationship updates apply to correct people (not AI duplicates)
 
-**Status**: ✅ Resolved - recordId undefined fixed, primary event working, household labels correct
+**Status**: ✅ Fully resolved - all visibility filtering in place, relationships persisting correctly
 
-**Files**: `src/components/AddNameInfoSheet.jsx` (lines 1327-1328, 1510-1511, 1358)
+**Files**: `src/components/AddNameInfoSheet.jsx` (lines 1327-1328, 1510-1511, 1536, 1358)
 
 ### 28. Immutable Census Data Updates for Task Independence (2026-02-17)
 **Decision**: Replace all direct mutations with immutable update patterns
