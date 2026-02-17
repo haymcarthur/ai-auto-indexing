@@ -486,7 +486,7 @@ export const RecordGroupCard = ({
                     options={availableNames}
                     allowCreate={true}
                     createLabel="Create new name"
-                    disabled={isExistingCensusName}
+                    disabled={member.isOriginal || isExistingCensusName}
                     onChange={(value) => {
                       // Check if this is a new name that needs QuickGlance
                       const isExisting = availableNames.some(n => n.label === value);
