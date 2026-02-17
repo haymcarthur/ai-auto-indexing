@@ -21,32 +21,29 @@ export function validateTask(censusData) {
 
   // Required people for John Ockerman's household
   // Note: In the data, only John has surname "Ockerman", others may have empty surnames
-  // For spouse, name might be "Heamy" or "Reamy"
   const requiredPeople = [
     { name: 'John', surname: 'Ockerman', key: 'johnAdded', requireSurname: true },
-    { name: 'Reamy', alternateNames: ['Heamy'], key: 'reamyAdded', requireSurname: false },
+    { name: 'Reamy', key: 'reamyAdded', requireSurname: false },
     { name: 'Isaic', key: 'isaicAdded', requireSurname: false },
     { name: 'Joseph', key: 'josephAdded', requireSurname: false },
     { name: 'George', key: 'georgeAdded', requireSurname: false },
     { name: 'Christopher', key: 'christopherAdded', requireSurname: false }
   ];
 
-  // Find John Ockerman's record (the one with John Ockerman and spouse Heamy/Reamy)
-  // Note: Spouse name might be "Heamy" or "Reamy" and may not have surname
+  // Find John Ockerman's record (the one with John Ockerman and spouse Reamy)
   const johnRecord = censusData.records.find(record => {
     const hasJohn = record.people.some(person =>
       person.givenName?.toLowerCase().includes('john') &&
       person.surname?.toLowerCase() === 'ockerman'
     );
     const hasSpouse = record.people.some(person =>
-      (person.givenName?.toLowerCase().includes('reamy') ||
-       person.givenName?.toLowerCase().includes('heamy'))
+      person.givenName?.toLowerCase().includes('reamy')
     );
     return hasJohn && hasSpouse;
   });
 
   if (!johnRecord) {
-    console.warn('Could not find John Ockerman\'s record (married to Reamy/Heamy)');
+    console.warn('Could not find John Ockerman\'s record (married to Reamy)');
     return results;
   }
 

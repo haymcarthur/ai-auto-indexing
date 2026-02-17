@@ -8,7 +8,7 @@
       "people": [
         {
           "id": "1:1:X7YY-NPRG",
-          "givenName": "Heamy",
+          "givenName": "Reamy",
           "surname": "",
           "relationship": "Spouse",
           "sex": "",
@@ -64,7 +64,7 @@
               "type": "COUPLE",
               "role": "SPOUSE",
               "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Heamy"
+              "relatedPersonName": "Reamy"
             },
             {
               "type": "PARENT_CHILD",
@@ -103,7 +103,7 @@
               "type": "PARENT_CHILD",
               "role": "CHILD",
               "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Heamy"
+              "relatedPersonName": "Reamy"
             },
             {
               "type": "PARENT_CHILD",
@@ -142,7 +142,7 @@
               "type": "PARENT_CHILD",
               "role": "CHILD",
               "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Heamy"
+              "relatedPersonName": "Reamy"
             },
             {
               "type": "PARENT_CHILD",
@@ -181,7 +181,7 @@
               "type": "PARENT_CHILD",
               "role": "CHILD",
               "relatedPersonId": "1:1:X7YY-NPRG",
-              "relatedPersonName": "Heamy"
+              "relatedPersonName": "Reamy"
             },
             {
               "type": "PARENT_CHILD",
@@ -217,7 +217,7 @@
           },
           "person2": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Heamy",
+            "name": "Reamy",
             "role": "SPOUSE"
           }
         },
@@ -226,7 +226,7 @@
           "type": "PARENT_CHILD",
           "person1": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Heamy",
+            "name": "Reamy",
             "role": "PARENT"
           },
           "person2": {
@@ -240,7 +240,7 @@
           "type": "PARENT_CHILD",
           "person1": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Heamy",
+            "name": "Reamy",
             "role": "PARENT"
           },
           "person2": {
@@ -254,7 +254,7 @@
           "type": "PARENT_CHILD",
           "person1": {
             "id": "1:1:X7YY-NPRG",
-            "name": "Heamy",
+            "name": "Reamy",
             "role": "PARENT"
           },
           "person2": {

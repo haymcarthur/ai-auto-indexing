@@ -115,9 +115,11 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
             const personName = person.givenName + (person.surname ? ' ' + person.surname : '');
             const normalizedRelationship = normalizeRelationshipRole(relationshipToThisPerson?.role);
 
+            // Invert the relationship: if John is PARENT of Joseph, show Joseph as CHILD of John
+            const inversedRelationship = getInverseRelationship(normalizedRelationship);
 
             return {
-              relationship: normalizedRelationship,
+              relationship: inversedRelationship,
               name: personName,
               fromGroupId: record.id,
               id: person.id // Add person ID for bidirectional updates
@@ -195,9 +197,11 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
             const personName = person.givenName + (person.surname ? ' ' + person.surname : '');
             const normalizedRelationship = normalizeRelationshipRole(relationshipToThisPerson?.role);
 
+            // Invert the relationship: if John is PARENT of Joseph, show Joseph as CHILD of John
+            const inversedRelationship = getInverseRelationship(normalizedRelationship);
 
             return {
-              relationship: normalizedRelationship,
+              relationship: inversedRelationship,
               name: personName,
               fromGroupId: preselectedRecordGroup.id,
               id: person.id // Add person ID for bidirectional updates
@@ -293,16 +297,18 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
         // Try using the ref first
         if (infoSheetContentRef.current) {
+          console.log('[Scroll] Using ref to scroll to top');
           infoSheetContentRef.current.scrollTo({ top: 0, behavior: 'instant' });
           scrolled = true;
         } else {
-          console.warn('[useEffect] Ref is null, trying fallback method');
+          console.warn('[Scroll] Ref is null, trying fallback method');
 
           // Fallback: Find the scrollable div within the InfoSheet
           const allDivs = document.querySelectorAll('div');
           for (const div of allDivs) {
             const style = window.getComputedStyle(div);
             if (style.overflowY === 'auto' && div.scrollHeight > div.clientHeight) {
+              console.log('[Scroll] Using fallback to scroll to top');
               div.scrollTo({ top: 0, behavior: 'instant' });
               scrolled = true;
               break;
@@ -311,11 +317,11 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         }
 
         if (!scrolled) {
-          console.error('[useEffect] Could not find scrollable element');
+          console.error('[Scroll] Could not find scrollable element');
         }
 
         setShouldScrollToTop(false);
-      }, 150);
+      }, 300);
 
       return () => clearTimeout(timer);
     }
@@ -618,34 +624,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         });
       }
 
-      // If there are people to move, show dialog for first person
-      if (peopleToMove.length > 0) {
-        // Get current group members including the person being added (from essentialInfo)
-        const currentPersonName = getCurrentPersonName();
-        const currentGroupMembers = [
-          // Add the current person being added first
-          {
-            name: currentPersonName,
-            relationship: 'Primary' // The person being added is typically primary
-          },
-          // Then add other members from the form
-          ...formData.members
-            .filter(m => m.name !== peopleToMove[0].name)
-            .map(m => ({
-              name: m.name,
-              relationship: m.relationship
-            }))
-        ];
-
-        setDialogState({
-          showPreviousRelationships: true,
-          currentPersonIndex: 0,
-          peopleToMove,
-          pendingFormData: formData,
-          currentGroupMembers
-        });
-        return; // Don't proceed with card transition yet
-      }
+      // Skip dialog and proceed regardless of people being moved
     }
 
     // Save the data
@@ -743,8 +722,10 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
       // Build the updated person object, merging edited fields with original data
       // Convert members from Record Group card to relationships array
+      // IMPORTANT: member.relationship is the INVERTED relationship for display (e.g., "Child")
+      // We need to invert it BACK to get the correct relationship FROM this person TO the member
       const relationshipsFromMembers = currentPersonData.recordGroup?.members?.map(member => ({
-        role: member.relationship || 'UNKNOWN',
+        role: member.relationship ? getInverseRelationship(member.relationship).toUpperCase() : 'UNKNOWN',
         relatedPersonName: member.name || '',
         relatedPersonId: member.id || ''
       })) || [];
@@ -1753,7 +1734,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           age: '',
           race: '',
           isPrimary: false,
-          isVisible: false,
+          isVisible: true, // Make visible so they appear in Names panel
           relationships: relationships,
           attachedPersons: [],
           hints: []

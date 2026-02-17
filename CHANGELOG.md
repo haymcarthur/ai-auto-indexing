@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-02-12 - Deployment Fixes and Production Setup
+
+### Vercel Deployment Fixes
+- **Fixed import path issue**: Changed SelectNameInfoSheet.jsx imports from `../../../ux-zion-library` to `../../ux-zion-library` - incorrect path was going outside project directory, causing build failure on Vercel
+- **Fixed missing image asset**: Copied SearchForName.gif from project root to public/ directory so it can be served correctly on deployed site
+- **Fixed image reference**: Updated FindDetailsDialog.jsx to use correct filename (SearchForName.gif, not SearchingForNames.png)
+
+### Production URL Configuration
+- **Updated user-test-hub dashboard URLs**: Changed test URLs from `http://localhost:3004/` to `https://ai-auto-indexing.vercel.app/` in both Dashboard.jsx and TestDetail.jsx
+- **Status parameter integration**: Confirmed test uses `?status=in%20progress` URL parameter for proper analytics filtering - "Launch Test" button automatically appends current study status
+
+### Deployment Status
+- ✅ ai-auto-index deployed to Vercel: https://ai-auto-indexing.vercel.app/
+- ✅ Build succeeds without errors
+- ✅ All assets loading correctly
+- ✅ Dashboard "Launch Test" button points to production URL with status parameter
+
 ## 2026-02-12 - Analytics Data Flow Refactor & Validation Fixes
 
 ### Analytics Data Flow (Session 10)

@@ -130,39 +130,7 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
         });
       }
 
-      // If there are people to move, show dialog for first person
-      if (peopleToMove.length > 0) {
-        // Get current group members (excluding the current viewing person but INCLUDING other people being moved)
-        const currentGroupMembers = getRecordGroupPeople(censusData, currentRecord.id)
-          .filter(p => p.id !== person.id && getFullName(p) !== peopleToMove[0].name)
-          .map(p => ({
-            name: getFullName(p),
-            relationship: p.relationship
-          }));
-
-        // Add other people being moved (except the current one) to the list
-        peopleToMove.forEach((personToMove, index) => {
-          if (index !== 0) { // Skip the first person (current one in dialog)
-            currentGroupMembers.push({
-              name: personToMove.name,
-              relationship: personToMove.newRelationship
-            });
-          }
-        });
-
-        setDialogState({
-          showPreviousRelationships: true,
-          showDeleteMember: false,
-          currentPersonIndex: 0,
-          peopleToMove,
-          pendingFormData: formData,
-          memberToDelete: null,
-          currentGroupMembers
-        });
-        return;
-      }
-
-      // No people to move, proceed with normal save
+      // Skip dialog and proceed with normal save regardless of people being moved
       performSaveWithoutDialogs(formData);
     } else if (cardName === 'events') {
       // Handle events card save - update the person's events in census data
@@ -654,6 +622,8 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
       sex: '',
       age: '',
       race: '',
+      isPrimary: false,
+      isVisible: true, // Make visible so they appear in Names panel
       attachedPersons: [],
       hints: [],
       events: []
@@ -662,13 +632,6 @@ export const ViewNameInfoSheet = ({ person: initialPerson, censusData, onUpdateC
     // Add to census data
     currentRecord.people.push(newPerson);
     onUpdateCensusData?.(updatedCensusData);
-
-    // Show dialog asking if they want to add details
-    setNewPersonDialog({
-      showDetailsDialog: true,
-      newPersonName: fullName,
-      newPersonId
-    });
 
     return newPersonId;
   };

@@ -1,5 +1,105 @@
 # Technical Decisions
 
+## Deployment and Production Setup Decisions (2026-02-12 Session 11)
+
+### 64. Correct Import Path Resolution for ux-zion-library
+**Date:** 2026-02-12 (Session 11)
+**Status:** Implemented ✅
+
+**Decision**: Use `../../ux-zion-library` import path from `src/components/` directory, not `../../../ux-zion-library`.
+
+**Problem**: SelectNameInfoSheet.jsx was using `../../../ux-zion-library` (3 levels up) which went outside the project directory. This worked locally if ux-zion-library existed in parent directory, but failed on Vercel build environment.
+
+**Implementation**:
+```javascript
+// Before (incorrect - goes outside project)
+import { InfoSheet } from '../../../ux-zion-library/src/components/InfoSheet';
+
+// After (correct - stays within project)
+import { InfoSheet } from '../../ux-zion-library/src/components/InfoSheet';
+```
+
+**Rationale**:
+- File location: `src/components/SelectNameInfoSheet.jsx`
+- Library location: `ux-zion-library/` (project root)
+- Correct path: Up 2 levels (`../../`) to reach project root, then into library
+
+**Files Modified**: SelectNameInfoSheet.jsx
+
+### 65. Public Directory Asset Management
+**Date:** 2026-02-12 (Session 11)
+**Status:** Implemented ✅
+
+**Decision**: Store all publicly accessible assets (images, GIFs) in `public/` directory for proper serving in both development and production.
+
+**Problem**: SearchForName.gif existed in project root but wasn't accessible at `/SearchForName.gif` URL path. Vercel serves static assets from `public/` directory only.
+
+**Implementation**:
+- Moved SearchForName.gif from project root → `public/SearchForName.gif`
+- File accessible at `/SearchForName.gif` URL path in both dev and production
+- Image reference in FindDetailsDialog.jsx uses correct filename
+
+**Rationale**: Vite/Vercel build process only serves files from `public/` directory as static assets. Files outside `public/` are not included in deployment.
+
+**Files Modified**:
+- public/SearchForName.gif (new file)
+- FindDetailsDialog.jsx (corrected reference)
+
+### 66. Production URL Configuration in Dashboard
+**Date:** 2026-02-12 (Session 11)
+**Status:** Implemented ✅
+
+**Decision**: Configure test URLs in user-test-hub dashboard to point to production deployment, not localhost.
+
+**Problem**: "Launch Test" button on dashboard pointed to `http://localhost:3004/`, which doesn't work when dashboard deployed or accessed remotely.
+
+**Implementation**:
+```javascript
+// Dashboard.jsx and TestDetail.jsx
+{
+  id: 'ai-auto-index',
+  title: 'AI Auto Index Study',
+  // ...
+  url: 'https://ai-auto-indexing.vercel.app/', // Production URL
+}
+```
+
+**Rationale**: Dashboard should launch production test URL so testers can access from anywhere. Status parameter automatically appended by button logic: `${test.url}?status=${encodeURIComponent(currentStatus)}`.
+
+**Files Modified**:
+- user-test-hub/src/pages/Dashboard.jsx
+- user-test-hub/src/pages/TestDetail.jsx
+
+### 67. URL Status Parameter Pattern for Analytics Filtering
+**Date:** 2026-02-12 (Session 11)
+**Status:** Documented (existing pattern)
+
+**Decision**: Use URL parameter `?status=in%20progress` to pass study status from dashboard to test application for proper analytics filtering.
+
+**Problem**: Test results were being saved with default status "planning" instead of actual study status, causing them not to appear in "In Progress" filtered views.
+
+**Implementation**:
+```javascript
+// ai-auto-index/src/lib/supabase.js
+const params = new URLSearchParams(window.location.search);
+const projectStatus = params.get('status') || 'planning';
+
+// Saves to database:
+await supabase
+  .from('test_sessions')
+  .insert({
+    project_status: projectStatus // e.g., "in progress"
+  });
+```
+
+**URL Format**: `https://ai-auto-indexing.vercel.app/?status=in%20progress`
+- Space encoded as `%20`
+- Status value matches study status on dashboard ("planning", "in progress", "complete")
+
+**Rationale**: Enables filtering test results by project lifecycle stage. Dashboard "Launch Test" button automatically constructs URL with current status using `encodeURIComponent(currentStatus)`.
+
+**Files Modified**: None (pattern already implemented, documented for clarity)
+
 ## Analytics Data Flow Decisions (2026-02-12 Session 10)
 
 ### 53. Accumulated Response Submission Pattern

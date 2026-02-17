@@ -106,57 +106,8 @@ export const ManageNamesInfoSheet = ({ censusData, recordGroups, onBack, onClose
       return;
     }
 
-    // Check if person has relationships in source group (more than just them)
-    const hasRelationships = sourceRecord.people.length > 1;
-
-    if (hasRelationships) {
-      // Get previous relationships
-      const previousRelationships = sourceRecord.people
-        .filter(p => p.id !== personToMove.id)
-        .map(p => {
-          if (personToMove.relationship === 'Primary' || personToMove.relationship === 'Head') {
-            return {
-              relationship: p.relationship,
-              name: `${p.givenName} ${p.surname}`.trim()
-            };
-          }
-          if (p.relationship === 'Primary' || p.relationship === 'Head') {
-            return {
-              relationship: getInverseRelationship(personToMove.relationship),
-              name: `${p.givenName} ${p.surname}`.trim()
-            };
-          }
-          return {
-            relationship: 'No Relation',
-            name: `${p.givenName} ${p.surname}`.trim()
-          };
-        });
-
-      // Get current group members for the target
-      let currentGroupMembers = [];
-      if (targetRecordGroup !== 'new-group') {
-        const targetRecord = censusData.records.find(r => r.id === targetRecordGroup.id);
-        if (targetRecord) {
-          currentGroupMembers = targetRecord.people.map(p => ({
-            relationship: 'No Relation',
-            name: `${p.givenName} ${p.surname}`.trim()
-          }));
-        }
-      }
-
-      // Show the Previous Relationships dialog
-      setDialogState({
-        showPreviousRelationships: true,
-        personToMove,
-        sourceRecordGroup,
-        targetRecordGroup,
-        previousRelationships,
-        currentGroupMembers
-      });
-    } else {
-      // No relationships, just move the person directly
-      completeMoveWithoutDialog(personToMove, sourceRecordGroup, targetRecordGroup);
-    }
+    // Skip dialog and move the person directly regardless of relationships
+    completeMoveWithoutDialog(personToMove, sourceRecordGroup, targetRecordGroup);
 
     setDraggedPerson(null);
   };

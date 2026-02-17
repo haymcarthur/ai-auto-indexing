@@ -109,12 +109,28 @@ export const RecordGroupCard = ({
     return existingGroups;
   })();
 
-  // Get ALL available names from census data (unfiltered)
+  // Get all visible census names (used for read-only check)
+  const allVisibleCensusNames = censusData
+    ? getAllNamesUnfiltered(censusData)
+        .filter(p => p.isVisible === true)
+        .map(p => p.fullName.toLowerCase())
+    : [];
+
+  // Get available names from census data with two-level filtering:
+  // Filter 1: Only show visible names (isVisible: true) - hides census data until AI makes it visible
+  // Filter 2: Exclude names already in this household - prevents duplicates in dropdown
   const availableNames = censusData
-    ? getAllNamesUnfiltered(censusData).map(p => ({
-        value: p.fullName,
-        label: p.fullName
-      }))
+    ? getAllNamesUnfiltered(censusData)
+        .filter(p => p.isVisible === true) // Only show names user has made visible
+        .filter(p => {
+          // Exclude names already added to this household
+          const existingNames = formData.members?.map(m => m.name.toLowerCase()) || [];
+          return !existingNames.includes(p.fullName.toLowerCase());
+        })
+        .map(p => ({
+          value: p.fullName,
+          label: p.fullName
+        }))
     : [];
 
   const getIconConfig = () => {
@@ -454,38 +470,43 @@ export const RecordGroupCard = ({
         </Paragraph>
 
         {/* Member Relationship Rows */}
-        {formData.members?.map((member, index) => (
-          <div key={index} style={{ marginBottom: spacing.xs }}>
-            <div style={{ display: 'flex', gap: spacing.xxs, marginBottom: spacing.xxs, alignItems: 'flex-end' }}>
-              {/* AutoSuggest for Name */}
-              <div style={{ flex: 1 }} ref={(el) => { if (el) autoSuggestRefs.current[index] = el; }}>
-                <AutoSuggest
-                  label="Name"
-                  placeholder="Name..."
-                  value={member.name}
-                  options={availableNames}
-                  allowCreate={true}
-                  createLabel="Create new name"
-                  onChange={(value) => {
-                    // Check if this is a new name that needs QuickGlance
-                    const isExisting = availableNames.some(n => n.label === value);
+        {formData.members?.map((member, index) => {
+          // Check if this is an existing visible census name (not just in filtered dropdown)
+          const isExistingCensusName = member.name && allVisibleCensusNames.includes(member.name.toLowerCase());
 
-                    if (!isExisting && value.trim()) {
-                      // Delay showing QuickGlance to let the selection finish
-                      setTimeout(() => {
-                        setNewPersonState({
-                          showQuickGlance: true,
-                          pendingName: value,
-                          memberIndex: index
-                        });
-                      }, 50);
-                    } else {
-                      // Existing name, just update
-                      handleNameChange(index, value);
-                    }
-                  }}
-                />
-              </div>
+          return (
+            <div key={index} style={{ marginBottom: spacing.xs }}>
+              <div style={{ display: 'flex', gap: spacing.xxs, marginBottom: spacing.xxs, alignItems: 'flex-end' }}>
+                {/* AutoSuggest for Name */}
+                <div style={{ flex: 1 }} ref={(el) => { if (el) autoSuggestRefs.current[index] = el; }}>
+                  <AutoSuggest
+                    label="Name"
+                    placeholder="Name..."
+                    value={member.name}
+                    options={availableNames}
+                    allowCreate={true}
+                    createLabel="Create new name"
+                    disabled={isExistingCensusName}
+                    onChange={(value) => {
+                      // Check if this is a new name that needs QuickGlance
+                      const isExisting = availableNames.some(n => n.label === value);
+
+                      if (!isExisting && value.trim()) {
+                        // Delay showing QuickGlance to let the selection finish
+                        setTimeout(() => {
+                          setNewPersonState({
+                            showQuickGlance: true,
+                            pendingName: value,
+                            memberIndex: index
+                          });
+                        }, 50);
+                      } else {
+                        // Existing name, just update
+                        handleNameChange(index, value);
+                      }
+                    }}
+                  />
+                </div>
 
               {/* Select for Relationship */}
               <div style={{ width: '160px' }}>
@@ -511,36 +532,15 @@ export const RecordGroupCard = ({
                 size="md"
                 label={`Remove ${member.name || 'member'}`}
                 onClick={() => {
-                  // Check if this person was added from another group
-                  if (member.fromGroupId && !member.isOriginal) {
-                    // Just remove from list, no dialog
-                    const newMembers = formData.members.filter((_, i) => i !== index);
-                    setFormData(prev => ({ ...prev, members: newMembers }));
-                  } else {
-                    // This is an original member or new name - need to show dialog
-                    // Find the actual person object from census data
-                    if (censusData && member.name) {
-                      const allGroups = getAllRecordGroupsUnfiltered(censusData);
-                      let foundPerson = null;
-                      for (const group of allGroups) {
-                        foundPerson = group.people.find(p => {
-                          const fullName = `${p.givenName} ${p.surname}`.trim();
-                          return fullName === member.name;
-                        });
-                        if (foundPerson) break;
-                      }
-
-                      if (foundPerson) {
-                        // Pass the index so ViewNameInfoSheet can remove from list after delete
-                        onDelete?.(foundPerson, index);
-                      }
-                    }
-                  }
+                  // Simply remove the member from the list without showing any dialog
+                  const newMembers = formData.members.filter((_, i) => i !== index);
+                  setFormData(prev => ({ ...prev, members: newMembers }));
                 }}
               />
             </div>
           </div>
-        ))}
+        );
+        })}
 
         {/* Add Household Member Button */}
         <div style={{ marginBottom: spacing.xs }}>
