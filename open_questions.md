@@ -1,5 +1,36 @@
 # Open Questions & Issues
 
+## Recently Resolved (2026-02-17)
+
+### 5. Long Loading on Submission - RESOLVED ✅
+**Date Identified**: 2026-02-17 (User testing feedback)
+**Date Resolved**: 2026-02-17 (Same day)
+**Location**: TestSessionContext.jsx
+**Issue**: Users experienced 10-30 second wait when clicking Submit button, leading to confusion and page refreshes that caused loss of test data and forced retries.
+**Root Cause**: UI waited for all database operations (task completions, survey responses, validation data, recording upload) to complete before showing thank you screen.
+**Solution**:
+1. Show thank you screen immediately (< 100ms) using optimistic UI pattern
+2. Move all database operations to background fire-and-forget function
+3. Remove blocking alert dialogs, replace with console logging
+4. User sees completion instantly and cannot lose work by refreshing
+**Files Modified**: src/contexts/TestSessionContext.jsx
+**Status**: ✅ Deployed to production
+
+### 6. User Testing Bug Fixes - RESOLVED ✅
+**Date Identified**: 2026-02-13 (Sessions 1-2)
+**Date Resolved**: 2026-02-17 (Deployed)
+**Issues Fixed**:
+1. Relationship inversion in Task B edit flow (Children showing as Parents)
+2. Name filtering - census data leaking into manual flow
+3. Missing read-only protection on census names
+4. PreviousRelationshipsDialog appearing unexpectedly
+5. Scroll-to-top not working in Save and Continue flow
+6. Highlight positioning not working correctly
+**Solution**: All fixes from Sessions 1-2 deployed to production and verified working
+**Status**: ✅ All user testing bugs resolved and deployed
+
+---
+
 ## Pending Issues
 
 ### 1. Production Deployment - FULLY RESOLVED ✅
