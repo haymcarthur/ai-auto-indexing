@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-02-17 - Read-Only Household Member Names
+
+### Bug Fix: Prevent Accidental Duplicate Creation
+- **Fixed editable names in Household Details**: When adding a new person to an existing household, pre-populated household member names are now read-only
+- **Prevents duplicate creation**: Users can no longer accidentally create duplicate people by editing existing member names (e.g., adding surnames)
+- **Implementation**: Uses `isOriginal` flag to distinguish pre-populated members (read-only) from newly added members (editable)
+
+### Files Modified
+- `src/components/RecordGroupCard.jsx` - Added `member.isOriginal` check to disable prop
+
+---
+
 ## 2026-02-17 - Instant Thank You Screen with Background Saves
 
 ### UX Improvement: Optimistic Submission

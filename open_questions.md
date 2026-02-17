@@ -29,6 +29,16 @@
 **Solution**: All fixes from Sessions 1-2 deployed to production and verified working
 **Status**: ✅ All user testing bugs resolved and deployed
 
+### 7. Editable Household Member Names Creating Duplicates - RESOLVED ✅
+**Date Identified**: 2026-02-17 (User testing feedback)
+**Date Resolved**: 2026-02-17 (Same day)
+**Location**: RecordGroupCard.jsx
+**Issue**: When adding a new person to existing household, pre-populated household member names were editable. Tester tried to add surnames to existing members, inadvertently creating duplicate people.
+**Root Cause**: Name field only disabled based on `isExistingCensusName` check, not checking if member was pre-populated from existing household.
+**Solution**: Added `member.isOriginal` flag check to disable name field for pre-populated members. Newly added members (via "Add Household Member" button) remain editable.
+**Files Modified**: src/components/RecordGroupCard.jsx (line 489)
+**Status**: ✅ Deployed to production
+
 ---
 
 ## Pending Issues

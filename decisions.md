@@ -1544,3 +1544,20 @@ onSaveAndReturn={(updatedPerson) => {
   emphasis="low"
 />
 ```
+
+### 26. Read-Only Names Using isOriginal Flag (2026-02-17)
+**Decision**: Use `isOriginal` flag to make pre-populated household member names read-only in RecordGroupCard
+
+**Problem**: When adding a new person to an existing household, users could edit pre-populated household member names, inadvertently creating duplicate people instead of editing originals
+
+**Solution**: Check `member.isOriginal || isExistingCensusName` to disable name field for:
+- Members pre-populated from existing household (`isOriginal: true`)
+- Names matching existing visible census persons (`isExistingCensusName`)
+
+**Rationale**:
+- Pre-populated members are marked with `isOriginal: true` when entering edit/add mode
+- Newly added members (via "Add Household Member" button) lack this flag, remaining editable
+- Users can still edit relationships for all members, just not names of existing people
+- Prevents accidental duplicate creation while maintaining flexibility to add new members
+
+**Files**: `src/components/RecordGroupCard.jsx` (line 489)
