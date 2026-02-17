@@ -1,5 +1,28 @@
 # Open Questions & Issues
 
+## Active Issues (2026-02-17)
+
+### 8. Manual Entry AI Data Leak - IN PROGRESS ⚠️
+**Date Identified**: 2026-02-17 (User testing feedback)
+**Status**: 🔶 Partially fixed, encountering new error
+**Location**: AddNameInfoSheet.jsx
+
+**Problem**: When manually adding people (bypassing AI), the system showed AI-extracted data instead of blank forms. Also caused duplicates in Names panel.
+
+**Root Cause**: Name-based searches found AI people instead of manually-created temp people with same names.
+
+**Attempted Solution**:
+1. Added temp ID tracking to remainingPeople
+2. Filter searches by `isVisible: true` to exclude AI data
+3. Filter member existence checks by `isVisible: true`
+4. Set manually-created people to `isVisible: true`
+
+**Current Blocker**: Getting `[handleSaveAndContinue] Could not find record: undefined` error when pressing "Save and Continue" after manually entering first person.
+
+**Files Modified**: src/components/AddNameInfoSheet.jsx (lines 1327-1328, 1510-1511, 1358, 1413-1427)
+
+---
+
 ## Recently Resolved (2026-02-17)
 
 ### 5. Long Loading on Submission - RESOLVED ✅

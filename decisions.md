@@ -1561,3 +1561,24 @@ onSaveAndReturn={(updatedPerson) => {
 - Prevents accidental duplicate creation while maintaining flexibility to add new members
 
 **Files**: `src/components/RecordGroupCard.jsx` (line 489)
+
+### 27. Visibility-Based Person Filtering for Manual vs AI Flows (2026-02-17)
+**Decision**: Use `isVisible` flag to separate manually-created people from AI-extracted people
+
+**Problem**: When manually adding people with same names as AI-extracted people, the system was loading AI data instead of blank forms, causing duplicates and data leaks
+
+**Solution**:
+- Filter by `isVisible: true` when searching for people by name
+- Filter by `isVisible: true` when checking if member already exists
+- Set `isVisible: true` for manually-created temp people
+- AI-extracted people start with `isVisible: false`
+
+**Rationale**:
+- AI data and manual data can coexist in same record without conflicts
+- Manually-created people are immediately usable (visible in Names panel)
+- AI people only become visible after user reviews them
+- Prevents name collisions between manual and AI flows
+
+**Status**: ⚠️ Implementation encountering issues with recordId undefined error
+
+**Files**: `src/components/AddNameInfoSheet.jsx` (lines 1327-1328, 1510-1511, 1358)
