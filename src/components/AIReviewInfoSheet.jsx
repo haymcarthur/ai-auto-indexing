@@ -280,20 +280,19 @@ export const AIReviewInfoSheet = ({
           vitalInfoLines.push({ label: 'Race', value: person.race });
         }
 
-        // Build relationship lines from relationships array
-        const relationshipLines = [];
-        if (person.relationships && person.relationships.length > 0) {
-          person.relationships.forEach(rel => {
-            if (rel.relatedPersonName) {
-              // Invert the role for display: if person's role is PARENT, show related person as CHILD
+        // Build household member lines: every other person in the group.
+        // Show their established relationship role (inverted for display) or "No Relation".
+        const householdMemberLines = sortedPeople
+          .filter(other => other.id !== person.id)
+          .map(other => {
+            const otherName = `${other.givenName} ${other.surname}`.trim();
+            const rel = person.relationships?.find(r => r.relatedPersonId === other.id);
+            if (rel?.role) {
               const inverseRole = getInverseRelationshipRole(rel.role);
-              relationshipLines.push({
-                label: formatRelationshipLabel(inverseRole),
-                value: rel.relatedPersonName
-              });
+              return { label: formatRelationshipLabel(inverseRole), value: otherName };
             }
+            return { label: 'No Relation', value: otherName };
           });
-        }
 
         // Build event blocks (birth, residence, etc.)
         const eventBlocks = [];
@@ -398,13 +397,13 @@ export const AIReviewInfoSheet = ({
                   </div>
                 )}
 
-                {/* Relationships */}
-                {relationshipLines.length > 0 && (
+                {/* Household Members */}
+                {householdMemberLines.length > 0 && (
                   <div style={{ marginBottom: spacing.xs }}>
                     <div style={{ marginBottom: '2px' }}>
-                      <Header level="h6">Relationships</Header>
+                      <Header level="h6">Household Members</Header>
                     </div>
-                    {relationshipLines.map((line, idx) => (
+                    {householdMemberLines.map((line, idx) => (
                       <div key={idx} style={{ marginBottom: '4px' }}>
                         <Paragraph size="sm" style={{ color: colors.gray.gray100 }}>
                           <span style={{ color: colors.gray.gray60 }}>{line.label}: </span>
