@@ -93,28 +93,6 @@ const getInverseRelationshipRole = (role) => {
 };
 
 /**
- * Infers the relationship between two household members (A and B) given each one's
- * role toward a common head person. Returns { aToB, bToA } role strings, or null
- * if no relationship can be inferred.
- *
- * Covers the most common census-household cases:
- *   Spouse + Child of head  → Parent / Child
- *   Child  + Child of head  → Sibling / Sibling
- */
-const inferMemberRelationship = (roleAToHead, roleBToHead) => {
-  const CHILD_ROLES  = ['CHILD', 'STEPCHILD'];
-  const SPOUSE_ROLES = ['SPOUSE'];
-  const aIsChild  = CHILD_ROLES.includes(roleAToHead);
-  const bIsChild  = CHILD_ROLES.includes(roleBToHead);
-  const aIsSpouse = SPOUSE_ROLES.includes(roleAToHead);
-  const bIsSpouse = SPOUSE_ROLES.includes(roleBToHead);
-  if (aIsChild  && bIsChild)  return { aToB: 'SIBLING', bToA: 'SIBLING' };
-  if (aIsSpouse && bIsChild)  return { aToB: 'PARENT',  bToA: 'CHILD'   };
-  if (aIsChild  && bIsSpouse) return { aToB: 'CHILD',   bToA: 'PARENT'  };
-  return null;
-};
-
-/**
  * Helper function to get relationship type from role
  */
 const getRelationshipType = (role) => {
@@ -372,71 +350,7 @@ export const NamesInfoSheet = ({
                   return !existingIds.has(m.id) && !existingNames.includes(fullName);
                 });
                 if (membersToAdd.length > 0) {
-                  // Add members to the list first
                   updatedPeople = [...updatedPeople, ...membersToAdd];
-
-                  // Then add bidirectional relationships between each new member and
-                  // the existing people by inferring from each person's role toward cleanPerson
-                  membersToAdd.forEach(newMember => {
-                    const newMemberRoleToClean = newMember.relationships?.find(
-                      r => r.relatedPersonId === cleanPerson.id
-                    )?.role?.toUpperCase();
-                    if (!newMemberRoleToClean) return;
-
-                    const newMemberFullName = `${newMember.givenName} ${newMember.surname}`.trim();
-
-                    // Snapshot existing people (not cleanPerson, not new members) for bidirectional lookup
-                    const preExisting = updatedPeople.filter(
-                      p => p.id !== cleanPerson.id && !membersToAdd.some(m => m.id === p.id)
-                    );
-
-                    // Step 1: Update each existing person to include a relationship to the new member
-                    updatedPeople = updatedPeople.map(p => {
-                      if (p.id === cleanPerson.id) return p;
-                      if (membersToAdd.some(m => m.id === p.id)) return p;
-                      const pRoleToClean = p.relationships?.find(
-                        r => r.relatedPersonId === cleanPerson.id
-                      )?.role?.toUpperCase();
-                      if (!pRoleToClean) return p;
-                      const inferred = inferMemberRelationship(pRoleToClean, newMemberRoleToClean);
-                      if (!inferred) return p;
-                      if (p.relationships?.some(r => r.relatedPersonId === newMember.id)) return p;
-                      return {
-                        ...p,
-                        relationships: [...(p.relationships || []), {
-                          type: getRelationshipType(inferred.aToB),
-                          role: inferred.aToB,
-                          relatedPersonId: newMember.id,
-                          relatedPersonName: newMemberFullName
-                        }]
-                      };
-                    });
-
-                    // Step 2: Update new member to include relationships to existing people
-                    const additionalRels = [];
-                    preExisting.forEach(existingPerson => {
-                      const epRoleToClean = existingPerson.relationships?.find(
-                        r => r.relatedPersonId === cleanPerson.id
-                      )?.role?.toUpperCase();
-                      if (!epRoleToClean) return;
-                      const inferred = inferMemberRelationship(newMemberRoleToClean, epRoleToClean);
-                      if (!inferred) return;
-                      if (newMember.relationships?.some(r => r.relatedPersonId === existingPerson.id)) return;
-                      additionalRels.push({
-                        type: getRelationshipType(inferred.aToB),
-                        role: inferred.aToB,
-                        relatedPersonId: existingPerson.id,
-                        relatedPersonName: `${existingPerson.givenName} ${existingPerson.surname}`.trim()
-                      });
-                    });
-                    if (additionalRels.length > 0) {
-                      updatedPeople = updatedPeople.map(p =>
-                        p.id === newMember.id
-                          ? { ...p, relationships: [...(p.relationships || []), ...additionalRels] }
-                          : p
-                      );
-                    }
-                  });
                 }
               }
 
