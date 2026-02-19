@@ -217,26 +217,30 @@ export const NamesInfoSheet = ({
         onSaveAndReturn={(updatedPerson) => {
           // Add or update the person in selectedRecordGroup
           if (updatedPerson) {
+            // Strip _newHouseholdMembers before storing the person — it's handled separately below
+            const { _newHouseholdMembers: newHouseholdMembers = [], ...cleanPerson } = updatedPerson;
+
             setSelectedRecordGroup(prev => {
-              const personExists = prev.people.some(p => p.id === updatedPerson.id);
+              const personExists = prev.people.some(p => p.id === cleanPerson.id);
+              let updatedPeople;
 
               if (personExists) {
                 // UPDATE EXISTING PERSON
                 // Find the original person to detect changes
-                const originalPerson = prev.people.find(p => p.id === updatedPerson.id);
+                const originalPerson = prev.people.find(p => p.id === cleanPerson.id);
 
                 // Check if name changed
                 const nameChanged = originalPerson &&
-                  (originalPerson.givenName !== updatedPerson.givenName ||
-                   originalPerson.surname !== updatedPerson.surname);
+                  (originalPerson.givenName !== cleanPerson.givenName ||
+                   originalPerson.surname !== cleanPerson.surname);
 
-                const newFullName = `${updatedPerson.givenName} ${updatedPerson.surname}`.trim();
+                const newFullName = `${cleanPerson.givenName} ${cleanPerson.surname}`.trim();
 
                 // Update all people in the record group
-                const updatedPeople = prev.people.map(p => {
-                  if (p.id === updatedPerson.id) {
+                updatedPeople = prev.people.map(p => {
+                  if (p.id === cleanPerson.id) {
                     // This is the person being edited - use the updated version
-                    return { ...p, ...updatedPerson };
+                    return { ...p, ...cleanPerson };
                   } else {
                     // This is a related person - may need to update their relationships array
                     let needsUpdate = false;
@@ -245,7 +249,7 @@ export const NamesInfoSheet = ({
                     // 1. Update name references if name changed
                     if (nameChanged && updatedRelationships.length > 0) {
                       updatedRelationships = updatedRelationships.map(rel => {
-                        if (rel.relatedPersonId === updatedPerson.id) {
+                        if (rel.relatedPersonId === cleanPerson.id) {
                           needsUpdate = true;
                           return {
                             ...rel,
@@ -258,14 +262,14 @@ export const NamesInfoSheet = ({
 
                     // 2. Apply bidirectional relationship updates
                     // For each relationship the edited person has, ensure inverse exists on related person
-                    if (updatedPerson.relationships) {
-                      updatedPerson.relationships.forEach(rel => {
+                    if (cleanPerson.relationships) {
+                      cleanPerson.relationships.forEach(rel => {
                         if (rel.relatedPersonId === p.id) {
                           // The edited person has a relationship to this person
                           // Ensure this person has the inverse relationship back
 
                           const inverseRole = getInverseRelationshipRole(rel.role);
-                          const existingRelIndex = updatedRelationships.findIndex(r => r.relatedPersonId === updatedPerson.id);
+                          const existingRelIndex = updatedRelationships.findIndex(r => r.relatedPersonId === cleanPerson.id);
 
                           if (existingRelIndex !== -1) {
                             // Relationship exists - update it if role changed
@@ -284,7 +288,7 @@ export const NamesInfoSheet = ({
                             updatedRelationships.push({
                               type: getRelationshipType(inverseRole),
                               role: inverseRole,
-                              relatedPersonId: updatedPerson.id,
+                              relatedPersonId: cleanPerson.id,
                               relatedPersonName: newFullName
                             });
                           }
@@ -300,7 +304,7 @@ export const NamesInfoSheet = ({
                       );
 
                       // Find relationships to this person (p) in the new data
-                      const hasRelationshipNow = (updatedPerson.relationships || []).some(
+                      const hasRelationshipNow = (cleanPerson.relationships || []).some(
                         rel => rel.relatedPersonId === p.id
                       );
 
@@ -308,7 +312,7 @@ export const NamesInfoSheet = ({
                       if (hadRelationshipBefore && !hasRelationshipNow) {
                         needsUpdate = true;
                         updatedRelationships = updatedRelationships.filter(rel =>
-                          rel.relatedPersonId !== updatedPerson.id
+                          rel.relatedPersonId !== cleanPerson.id
                         );
                       }
                     }
@@ -316,30 +320,41 @@ export const NamesInfoSheet = ({
                     return needsUpdate ? { ...p, relationships: updatedRelationships } : p;
                   }
                 });
-
-                return {
-                  ...prev,
-                  people: updatedPeople
-                };
               } else {
-                // ADD NEW PERSON
-                const newPeople = [...prev.people, updatedPerson];
+                // ADD NEW PERSON (explicitly via Add Person button — not from household members)
+                const newPeople = [...prev.people, cleanPerson];
 
                 // Mark new person as reviewed and set as active
                 setReviewedPeopleInReview(reviewedSet => {
                   const updated = new Set(reviewedSet);
-                  updated.add(updatedPerson.id);
+                  updated.add(cleanPerson.id);
                   return updated;
                 });
 
                 // Set currentPersonIndex to the new person (last in array)
                 setCurrentPersonIndexInReview(newPeople.length - 1);
 
-                return {
-                  ...prev,
-                  people: newPeople
-                };
+                updatedPeople = newPeople;
               }
+
+              // Append new household members without changing the active card index.
+              // These come from the household details form (e.g. Christopher added to John's card)
+              // and must NOT call setCurrentPersonIndexInReview — that would reset all other cards.
+              if (newHouseholdMembers.length > 0) {
+                const existingIds = new Set(updatedPeople.map(p => p.id));
+                const existingNames = updatedPeople.map(p =>
+                  `${p.givenName} ${p.surname}`.trim().toLowerCase()
+                );
+                const membersToAdd = newHouseholdMembers.filter(m => {
+                  const fullName = `${m.givenName} ${m.surname}`.trim().toLowerCase();
+                  return !existingIds.has(m.id) && !existingNames.includes(fullName);
+                });
+                if (membersToAdd.length > 0) {
+                  updatedPeople = [...updatedPeople, ...membersToAdd];
+                }
+              }
+
+              return { ...prev, people: updatedPeople };
             });
           }
           setEditingPersonFromReview(null);

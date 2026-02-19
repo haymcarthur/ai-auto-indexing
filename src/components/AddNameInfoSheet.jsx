@@ -765,29 +765,25 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         deathPlace: currentPersonData.additionalEvents?.find(e => e.type === 'Death')?.place || basePersonData.deathPlace || ''
       };
 
-      onSaveAndReturn(personToReturn);
-
-      // Also surface any NEW household members as separate people in the review list
-      // A member is "new" if they are not already in preselectedRecordGroup.people
+      // Detect new household members not yet in the record group
       const existingMemberNames = (preselectedRecordGroup?.people || []).map(p =>
         `${p.givenName} ${p.surname}`.trim().toLowerCase()
       );
-      const newMembers = (currentPersonData.recordGroup?.members || []).filter(member => {
+      const newRawMembers = (currentPersonData.recordGroup?.members || []).filter(member => {
         if (!member.name?.trim()) return false;
         return !existingMemberNames.includes(member.name.trim().toLowerCase());
       });
 
-      newMembers.forEach(member => {
+      // Build new member objects with assigned tempIds
+      const newHouseholdMembers = newRawMembers.map(member => {
         const nameParts = member.name.trim().split(' ');
         const givenName = nameParts[0] || '';
         const surname = nameParts.slice(1).join(' ') || '';
         const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
         // member.relationship (e.g. "Child") is how the member relates TO the current person
-        // Invert it to get the current person's role TOWARD the member (e.g. "Parent")
+        // Invert it to get the new member's role TOWARD the current person (e.g. "Parent")
         const inverseRole = getInverseRelationship(member.relationship || 'No Relation');
-
-        const newMemberPerson = {
+        return {
           id: tempId,
           givenName,
           surname,
@@ -805,9 +801,25 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           attachedPersons: [],
           hints: []
         };
-
-        onSaveAndReturn(newMemberPerson);
       });
+
+      // Fix personToReturn.relationships: new members had no ID when relationships were built,
+      // so backfill their tempIds by matching on name
+      const fixedRelationships = personToReturn.relationships.map(rel => {
+        if (!rel.relatedPersonId) {
+          const match = newHouseholdMembers.find(m =>
+            `${m.givenName} ${m.surname}`.trim().toLowerCase() === rel.relatedPersonName.trim().toLowerCase()
+          );
+          if (match) return { ...rel, relatedPersonId: match.id };
+        }
+        return rel;
+      });
+
+      // Single onSaveAndReturn call — embed new members so NamesInfoSheet can add them
+      // without triggering setCurrentPersonIndexInReview (which would break card states)
+      onSaveAndReturn(newHouseholdMembers.length > 0
+        ? { ...personToReturn, relationships: fixedRelationships, _newHouseholdMembers: newHouseholdMembers }
+        : personToReturn);
 
       return; // Exit early - don't process censusData for Task B
     }
