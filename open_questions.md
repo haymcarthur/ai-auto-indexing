@@ -2,12 +2,15 @@
 
 ## Pending Issues (2026-02-19)
 
-### 12. Method B: Christopher Still Missing from Household Details When Editing Subsequent People – IN PROGRESS 🔍
+### 12. Method B: Christopher Missing from Household Details When Editing Subsequent People – RESOLVED ✅
 **Date Identified**: 2026-02-19
-**Location**: AddNameInfoSheet.jsx — Effect 2 (`else if (preselectedRecordGroup)` branch)
-**Issue**: After adding Christopher to John's card in the AI review flow, Christopher correctly appears in the "Household Members" section of each AIReviewInfoSheet card, but does NOT appear in the RecordGroupCard (Household Details) within AddNameInfoSheet when clicking Edit on subsequent household members.
-**Root Cause**: Two fixes applied — `isAIFlow` guard and Effect 1 early-return — but bug still reproducible. Temporary console.log instrumentation added to Effect 1, Effect 2, and `RecordGroupCard.renderReviewState` to trace exactly where Christopher drops out of the pipeline. Awaiting runtime output.
-**Status**: 🔍 Instrumentation committed; user testing in progress
+**Date Resolved**: 2026-02-19
+**Location**: AddNameInfoSheet.jsx — Effect 2
+**Issue**: After adding Christopher to John's card in the AI review flow, Christopher appeared correctly in AIReviewInfoSheet's "Household Members" section but not in the RecordGroupCard (Household Details) within AddNameInfoSheet when clicking Edit on subsequent household members.
+**Root Cause**: Effect 2's `censusData.records.find()` always found the original 5-person record (all Ockermans exist in censusData with `isVisible: false`), bypassing the `else if (preselectedRecordGroup)` branch that holds the live, updated record including Christopher. Effect 1 also ran redundantly and could overwrite Effect 2's output.
+**Solution**: (1) `isAIFlow` guard short-circuits the censusData lookup for Task B, forcing use of `preselectedRecordGroup` (NamesInfoSheet's `selectedRecordGroup` local state). (2) Early-return in Effect 1 when `preselectedPerson && !preselectedPerson.isNew` prevents it from running at all for existing-person edits.
+**Files Modified**: `src/components/AddNameInfoSheet.jsx`
+**Status**: ✅ Resolved
 
 ---
 
