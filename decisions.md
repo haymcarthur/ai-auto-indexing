@@ -1,5 +1,48 @@
 # Technical Decisions
 
+## Household Member Entry Fixes (2026-02-18)
+
+### 69. Defer New Person Creation to Save/Next in RecordGroupCard
+**Date:** 2026-02-18
+**Status:** Implemented ✅
+
+**Decision**: Remove the QuickGlance overlay from the member name field. Name + relationship are stored in local `formData` state as the user types/edits, and the new person is only created when the user clicks Save/Next on the card.
+
+**Problem**: The AutoSuggest `onChange` was triggering a QuickGlance overlay after a 50ms delay whenever a new (non-census) name was typed. Users who typed a name and selected a relationship without clicking "Create new name" in the overlay had their name silently dropped. Additionally, correcting a misspelling after confirming the overlay triggered the overlay again, creating a duplicate person.
+
+**Implementation**: Removed `newPersonState`, `autoSuggestRefs`, `handleNameSelect`, `handleSaveNewPerson`, `handleCancelNewPerson`, the `QuickGlanceOverlay` portal, and related imports. AutoSuggest `onChange` now calls `handleNameChange(index, value)` directly. Set `allowCreate={false}` to remove the "Create new name" dropdown option.
+
+**Rationale**: The parent (`AddNameInfoSheet`) already creates new person entries from raw member objects when Save/Next is pressed. The QuickGlance was an unnecessary intermediate commit that confused users. Deferring to Save/Next matches user expectation and eliminates the duplicate creation path.
+
+**Files Modified**: `src/components/RecordGroupCard.jsx`
+
+---
+
+## Highlights Viewer Fixes (2026-02-18)
+
+### 68. Reset allPeopleData Caches on Task Transition
+**Date:** 2026-02-18
+**Status:** Implemented ✅
+
+**Decision**: In `handleBackToEntry()`, reset `allPeopleData`, `allPeopleDataB`, and `allPeopleDataC` to `{}` (and clear `hoveredHighlightIds`) when the user navigates back to task selection.
+
+**Problem**: Manually-entered names (e.g., "Christopher" typed in Task A) persisted into Task B. The `allPeopleData` state variables held object references loaded from JSON; not resetting them allowed stale data to carry over between tasks.
+
+**Implementation**:
+```javascript
+// Added to handleBackToEntry()
+setAllPeopleData({});
+setAllPeopleDataB({});
+setAllPeopleDataC({});
+setHoveredHighlightIds([]);
+```
+
+**Rationale**: The data-loading `useEffect` hooks check `Object.keys(allPeopleData).length === 0` before fetching, so resetting to `{}` forces each task to reload clean JSON from disk on next entry. This guarantees full task independence.
+
+**Files Modified**: `viewer/src/App.jsx`
+
+---
+
 ## Deployment and Production Setup Decisions (2026-02-12 Session 11)
 
 ### 64. Correct Import Path Resolution for ux-zion-library

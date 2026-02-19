@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Card } from "../../ux-zion-library/src/components/Card";
 import { Button } from "../../ux-zion-library/src/components/Button";
@@ -9,13 +8,11 @@ import { Header } from "../../ux-zion-library/src/components/Header";
 import { Paragraph } from "../../ux-zion-library/src/components/Paragraph";
 import { AutoSuggest } from "../../ux-zion-library/src/components/AutoSuggest";
 import { Select } from "../../ux-zion-library/src/components/Select";
-import { QuickGlanceOverlay } from "../../ux-zion-library/src/components/QuickGlanceOverlay";
 import { PersonFamily, ContentAdd, ContentDelete } from "../../ux-zion-library/src/icons";
 import { colors, transparentColors } from "../../ux-zion-library/src/tokens/colors";
 import { spacing } from "../../ux-zion-library/src/tokens/spacing";
 import { bold } from "../../ux-zion-library/src/tokens/typography";
 import { getAllRecordGroupsUnfiltered, getAllNamesUnfiltered } from '../utils/censusData';
-import { AddPersonQuickGlance } from './AddPersonQuickGlance';
 
 // Core relationship types based on bidirectional pairs
 const RELATIONSHIPS = [
@@ -59,13 +56,6 @@ export const RecordGroupCard = ({
     }))
   });
 
-  // State for new person creation QuickGlanceOverlay
-  const [newPersonState, setNewPersonState] = useState({
-    showQuickGlance: false,
-    pendingName: '',
-    memberIndex: -1
-  });
-  const autoSuggestRefs = useRef({});
   const prevStateRef = useRef(state);
 
   // Update formData when transitioning INTO edit or add mode
@@ -173,68 +163,6 @@ export const RecordGroupCard = ({
     const newMembers = [...formData.members];
     newMembers[index].name = value;
     setFormData(prev => ({ ...prev, members: newMembers }));
-  };
-
-  // Handle option selection - show QuickGlance if Create option selected
-  const handleNameSelect = (index, option) => {
-    if (option.isCreate) {
-      // Delay showing QuickGlance to let the click event finish propagating
-      // This prevents the click from being detected as "click outside"
-      setTimeout(() => {
-        setNewPersonState({
-          showQuickGlance: true,
-          pendingName: option.label,
-          memberIndex: index
-        });
-      }, 50);
-    } else {
-      // For existing names, just update the formData
-      const newMembers = [...formData.members];
-      newMembers[index].name = option.value;
-      setFormData(prev => ({ ...prev, members: newMembers }));
-    }
-  };
-
-  // Handle saving new person from QuickGlance
-  const handleSaveNewPerson = (personData) => {
-    const { givenName, surname } = personData;
-    const fullName = `${givenName} ${surname}`.trim();
-
-    // Update the member name with the formatted full name
-    const newMembers = [...formData.members];
-    if (newPersonState.memberIndex >= 0) {
-      newMembers[newPersonState.memberIndex].name = fullName;
-      setFormData(prev => ({ ...prev, members: newMembers }));
-    }
-
-    // Call parent callback to create the person in census data
-    if (onNewPersonCreated) {
-      onNewPersonCreated(givenName, surname);
-    }
-
-    // Close current QuickGlance
-    setNewPersonState({
-      showQuickGlance: false,
-      pendingName: '',
-      memberIndex: -1
-    });
-  };
-
-  // Handle canceling QuickGlance
-  const handleCancelNewPerson = () => {
-    // Remove the name from the member
-    const newMembers = [...formData.members];
-    if (newPersonState.memberIndex >= 0) {
-      newMembers[newPersonState.memberIndex].name = '';
-      setFormData(prev => ({ ...prev, members: newMembers }));
-    }
-
-    // Close QuickGlance
-    setNewPersonState({
-      showQuickGlance: false,
-      pendingName: '',
-      memberIndex: -1
-    });
   };
 
   const renderHeader = () => {
@@ -478,33 +406,15 @@ export const RecordGroupCard = ({
             <div key={index} style={{ marginBottom: spacing.xs }}>
               <div style={{ display: 'flex', gap: spacing.xxs, marginBottom: spacing.xxs, alignItems: 'flex-end' }}>
                 {/* AutoSuggest for Name */}
-                <div style={{ flex: 1 }} ref={(el) => { if (el) autoSuggestRefs.current[index] = el; }}>
+                <div style={{ flex: 1 }}>
                   <AutoSuggest
                     label="Name"
                     placeholder="Name..."
                     value={member.name}
                     options={availableNames}
-                    allowCreate={true}
-                    createLabel="Create new name"
+                    allowCreate={false}
                     disabled={member.isOriginal || isExistingCensusName}
-                    onChange={(value) => {
-                      // Check if this is a new name that needs QuickGlance
-                      const isExisting = availableNames.some(n => n.label === value);
-
-                      if (!isExisting && value.trim()) {
-                        // Delay showing QuickGlance to let the selection finish
-                        setTimeout(() => {
-                          setNewPersonState({
-                            showQuickGlance: true,
-                            pendingName: value,
-                            memberIndex: index
-                          });
-                        }, 50);
-                      } else {
-                        // Existing name, just update
-                        handleNameChange(index, value);
-                      }
-                    }}
+                    onChange={(value) => handleNameChange(index, value)}
                   />
                 </div>
 
@@ -632,22 +542,6 @@ export const RecordGroupCard = ({
         )}
       </Card>
 
-      {/* QuickGlanceOverlay for new person creation - rendered via portal */}
-      {newPersonState.showQuickGlance && newPersonState.memberIndex >= 0 && createPortal(
-        <QuickGlanceOverlay
-          isOpen={newPersonState.showQuickGlance}
-          close={handleCancelNewPerson}
-          anchorRef={{ current: autoSuggestRefs.current[newPersonState.memberIndex] }}
-          position="bottom"
-        >
-          <AddPersonQuickGlance
-            fullName={newPersonState.pendingName}
-            onSave={handleSaveNewPerson}
-            onCancel={handleCancelNewPerson}
-          />
-        </QuickGlanceOverlay>,
-        document.body
-      )}
     </>
   );
 };

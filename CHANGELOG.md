@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-02-18 - Household Member Name Entry Simplified
+
+### Fixed Household Member Name Not Saving ✅
+- **Removed QuickGlance overlay requirement**: Users can now type a name and select a relationship directly — no "Create new name" confirmation step required
+- **Eliminated duplicate creation bug**: Names are only committed when user clicks Save/Next on the card, so editing a misspelled name no longer creates a duplicate person
+
+### Files Modified
+- `src/components/RecordGroupCard.jsx` - Removed QuickGlance overlay, simplified AutoSuggest onChange to commit directly to form state
+
+---
+
+## 2026-02-18 - Highlights Viewer Task Independence Fix
+
+### Fixed Name Persistence Between Tasks ✅
+- **Manually-entered names no longer carry over between tasks**: Names added in Task A (or B) no longer appear in Task B (or C) when navigating back to the entry screen and selecting a new task
+- **Implementation**: Added resets for `allPeopleData`, `allPeopleDataB`, `allPeopleDataC`, and `hoveredHighlightIds` in `handleBackToEntry()` in `App.jsx` — forces fresh JSON reload for each task
+
+### Files Modified
+- `viewer/src/App.jsx` - Reset all task data caches and hover state in handleBackToEntry
+
+---
+
 ## 2026-02-17 - Manual Entry Fixes (Session Continuation)
 
 ### Fixed Primary Event Data Population ✅
