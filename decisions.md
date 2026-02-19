@@ -1,5 +1,43 @@
 # Technical Decisions
 
+## AutoSuggest / Household Member Fixes (2026-02-19)
+
+### 71. Append Newly Created Household Members to remainingPeople Queue
+**Date:** 2026-02-19
+**Status:** Implemented ✅
+
+**Decision**: In `handleSaveAndContinue`, expand the `setRemainingPeople` call to also append brand-new people (those in `newPeopleToAdd`) to the end of the queue.
+
+**Problem**: When a user manually added Christopher to John's Household Details card and saved, Christopher was created in `updatedCensusData` but never added to `remainingPeople`. Since the ReviewCard reads from `remainingPeople` via `getRemainingPeopleNames()`, Christopher didn't appear in the Review card's list. And since he was never in the queue, he never got his own card.
+
+**Implementation**: Combined the existing `.map()` (which updated IDs of queue entries that were already objects) with a new step that appends new people:
+```javascript
+const newQueueEntries = newPeopleToAdd
+  .filter(np => !existingNames.includes(fullName))  // duplicate guard
+  .map(np => ({ givenName: np.givenName, surname: np.surname, id: np.id }));
+return [...updated, ...newQueueEntries];
+```
+
+**Duplicate guard rationale**: If the same person is added to multiple household cards before their turn comes, the guard prevents them from appearing twice in the queue.
+
+**Files Modified**: `src/components/AddNameInfoSheet.jsx`
+
+---
+
+### 70. Commit AutoSuggest Free-Text Input on Blur
+**Date:** 2026-02-19
+**Status:** Implemented ✅
+
+**Decision**: Add `onBlur` handler to `AutoSuggest` that calls `onChange(inputValue)` when the user leaves the field with uncommitted typed text.
+
+**Problem**: `AutoSuggest.onChange` only fired when an option was selected from the dropdown. Free-text input was tracked in local `inputValue` state only. When the user typed a name and tabbed to the Relationship select, the name was never passed to the parent — `formData.members[index].name` stayed empty.
+
+**Why blur doesn't conflict with option selection**: When a user clicks a list item, `onMouseDown` calls `e.preventDefault()`, preventing the input from blurring before `handleSelect` fires. `handleSelect` clears `inputValue` before blur can fire, so `onBlur` sees an empty `inputValue` and does nothing.
+
+**Files Modified**: `ux-zion-library/src/components/AutoSuggest.jsx`
+
+---
+
 ## Household Member Entry Fixes (2026-02-18)
 
 ### 69. Defer New Person Creation to Save/Next in RecordGroupCard

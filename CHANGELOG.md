@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-02-19 - Manually Added Member Now Gets Own Review Card
+
+### Fixed Manually Added Household Member Not Appearing in Review Queue ✅
+- **Root cause**: `handleSaveAndContinue` added new people to `censusData` but never to `remainingPeople`. The ReviewCard reads from `remainingPeople`, so the added person never appeared there and never got their own card.
+- **Fix**: Expanded the `setRemainingPeople` call to also append newly created people to the end of the queue (with a duplicate guard to prevent double-adding on subsequent household saves)
+
+### Files Modified
+- `src/components/AddNameInfoSheet.jsx` - Append new people to `remainingPeople` queue
+
+---
+
+## 2026-02-19 - AutoSuggest Free-Text Name Fix
+
+### Fixed Typed Name Not Saving in AutoSuggest ✅
+- **Root cause found**: `AutoSuggest.onChange` only fired on dropdown selection, never on free-text input — typed names were lost when the user tabbed away
+- **Fix**: Added `onBlur` handler that commits `inputValue` to `onChange` when the field loses focus
+
+### Files Modified
+- `ux-zion-library/src/components/AutoSuggest.jsx` - Added onBlur commit
+
+---
+
 ## 2026-02-18 - Household Member Name Entry Simplified
 
 ### Fixed Household Member Name Not Saving ✅

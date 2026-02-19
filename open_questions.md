@@ -2,12 +2,26 @@
 
 ## Pending Issues (2026-02-19)
 
-### 10. New Member Name Not Saving on Household Details Card - OPEN ⚠️
+### 11. Manually Added Household Member Not Getting Own Review Card - RESOLVED ✅
 **Date Identified**: 2026-02-19
-**Location**: RecordGroupCard.jsx / AddNameInfoSheet.jsx
-**Issue**: After removing the QuickGlance overlay, typing a name and selecting a relationship then pressing Save no longer saves the person. The member shows "Child" (or selected relationship) with no name, and the person does not appear in subsequent cards.
-**Root Cause**: Unknown — the name typed into the AutoSuggest field is not being committed to `formData` before Save is pressed. Likely the AutoSuggest `onChange` is not firing on free-text input (no option selected), or the value is being cleared before Save.
-**Status**: ⚠️ Open — fix pending
+**Date Resolved**: 2026-02-19
+**Location**: AddNameInfoSheet.jsx — `handleSaveAndContinue`
+**Issue**: Two separate symptoms across both methods:
+- **Method A**: Christopher shows in Household Details cards for all family members but does NOT appear in the Review card. He never gets his own card in the queue.
+- **Method B**: Christopher shows on John's AI Review card but not on other family members' cards and does not get a card of his own.
+**Root Cause**: In the old flow, `handleNewPersonCreated` added new people to BOTH `censusData` AND `remainingPeople`. With QuickGlance removed, `handleSaveAndContinue` added the person to `censusData` but never to `remainingPeople`. The ReviewCard reads directly from `remainingPeople` via `getRemainingPeopleNames()`, so Christopher didn't appear there either.
+**Solution**: Expanded the `setRemainingPeople` call in `handleSaveAndContinue` to append newly created people to the end of the queue (with a duplicate guard). Existing map logic (updating IDs) was preserved.
+**Files Modified**: `src/components/AddNameInfoSheet.jsx`
+**Status**: ✅ Newly added household members now appear in the Review card and get their own card at the end of the queue
+
+### 10. New Member Name Not Saving on Household Details Card - RESOLVED ✅
+**Date Identified**: 2026-02-19
+**Date Resolved**: 2026-02-19
+**Location**: AutoSuggest.jsx
+**Root Cause**: `AutoSuggest.onChange` only fired on dropdown selection, never on free-text input. Typed names were stored in local `inputValue` state but never committed to parent via `onChange`.
+**Solution**: Added `onBlur` handler to AutoSuggest — if `inputValue` is non-empty when the field loses focus, calls `onChange(inputValue)` to commit the typed value.
+**Files Modified**: `ux-zion-library/src/components/AutoSuggest.jsx`
+**Status**: ✅ Name now saves when user types and tabs away
 
 ---
 
