@@ -191,7 +191,13 @@ export const AutoSuggest = ({
           value={displayValue}
           onChange={handleInputChange}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => {
+            setIsFocused(false);
+            if (inputValue.trim()) {
+              onChange?.(inputValue.trim());
+              setInputValue('');
+            }
+          }}
           onClick={menu.handleClick}
           disabled={disabled}
           placeholder={placeholder}

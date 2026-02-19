@@ -1,5 +1,16 @@
 # Open Questions & Issues
 
+## Pending Issues (2026-02-19)
+
+### 10. New Member Name Not Saving on Household Details Card - OPEN ⚠️
+**Date Identified**: 2026-02-19
+**Location**: RecordGroupCard.jsx / AddNameInfoSheet.jsx
+**Issue**: After removing the QuickGlance overlay, typing a name and selecting a relationship then pressing Save no longer saves the person. The member shows "Child" (or selected relationship) with no name, and the person does not appear in subsequent cards.
+**Root Cause**: Unknown — the name typed into the AutoSuggest field is not being committed to `formData` before Save is pressed. Likely the AutoSuggest `onChange` is not firing on free-text input (no option selected), or the value is being cleared before Save.
+**Status**: ⚠️ Open — fix pending
+
+---
+
 ## Recently Resolved (2026-02-17)
 
 ### 9. Relationships Not Persisting in Manual Flow - RESOLVED ✅
