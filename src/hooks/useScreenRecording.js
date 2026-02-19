@@ -14,8 +14,8 @@ export function useScreenRecording() {
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
-  const partialRecordingsRef = useRef([]);
   const recordingBlobRef = useRef(null); // Store blob in ref for synchronous access
+  const stopResolveRef = useRef(null); // Resolves the stopRecording() Promise when onstop fires
 
   /**
    * Request permission and start recording
@@ -94,6 +94,12 @@ export function useScreenRecording() {
         setRecordingBlob(blob);
         setIsRecording(false);
 
+        // Resolve the stopRecording() Promise (if pending)
+        if (stopResolveRef.current) {
+          stopResolveRef.current(blob);
+          stopResolveRef.current = null;
+        }
+
         // Clean up streams
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
@@ -115,13 +121,10 @@ export function useScreenRecording() {
 
       // Handle user stopping screen share from browser UI
       displayStream.getVideoTracks()[0].onended = () => {
-        // Save the current recording chunks as a partial recording
-        if (chunksRef.current.length > 0) {
-          const partialBlob = new Blob(chunksRef.current, { type: 'video/webm' });
-          partialRecordingsRef.current.push(partialBlob);
-        }
-
-        // Stop the media recorder
+        // Stop the media recorder — onstop will handle blob creation and
+        // resolve the stopRecording() Promise. Don't manually snapshot
+        // chunksRef here because onstop fires immediately after and would
+        // create a duplicate blob containing the same data.
         if (mediaRecorder.state === 'recording') {
           mediaRecorder.stop();
         }
@@ -158,12 +161,31 @@ export function useScreenRecording() {
   }, []);
 
   /**
-   * Stop recording
+   * Stop recording and return a Promise that resolves with the recording blob
+   * once the MediaRecorder has fully finalized (onstop has fired).
+   * Safe to call even if the recorder is already stopped.
    */
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
+    // Already stopped (e.g. user ended screen share via browser UI) —
+    // onstop already fired and set recordingBlobRef, so resolve immediately.
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') {
+      return Promise.resolve(recordingBlobRef.current);
     }
+
+    return new Promise((resolve) => {
+      // 5-second safety timeout in case onstop never fires
+      const timeout = setTimeout(() => {
+        stopResolveRef.current = null;
+        resolve(recordingBlobRef.current);
+      }, 5000);
+
+      stopResolveRef.current = (blob) => {
+        clearTimeout(timeout);
+        resolve(blob);
+      };
+
+      mediaRecorderRef.current.stop();
+    });
   }, []);
 
   /**
@@ -177,23 +199,12 @@ export function useScreenRecording() {
   }, []);
 
   /**
-   * Get the current recording blob (combines all partial recordings if any)
+   * Get the current recording blob synchronously.
+   * Prefer awaiting stopRecording() to get the blob deterministically.
    */
   const getRecordingBlob = useCallback(() => {
-    // Use ref instead of state for synchronous access
-    const currentBlob = recordingBlobRef.current;
-
-    // If we have partial recordings, combine them with the final recording
-    if (partialRecordingsRef.current.length > 0 && currentBlob) {
-      const allBlobs = [...partialRecordingsRef.current, currentBlob];
-      return new Blob(allBlobs, { type: 'video/webm' });
-    } else if (partialRecordingsRef.current.length > 0) {
-      // Only partial recordings exist
-      return new Blob(partialRecordingsRef.current, { type: 'video/webm' });
-    }
-
-    return currentBlob;
-  }, [recordingBlob]);
+    return recordingBlobRef.current;
+  }, []);
 
   return {
     isRecording,

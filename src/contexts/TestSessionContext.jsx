@@ -75,8 +75,10 @@ export function TestSessionProvider({ children }) {
     // Extract responses from new structure
     const { task1, task2, final, taskOrder } = allResponses;
 
-    // Stop recording and capture blob immediately
-    recording.stopRecording();
+    // Start stopping the recording — returns a Promise that resolves with
+    // the blob once onstop has fully fired. Don't await here so the thank
+    // you screen shows immediately.
+    const recordingBlobPromise = recording.stopRecording();
 
     // IMMEDIATELY show thank you screen - don't make user wait for database operations
     setTestComplete(true);
@@ -86,8 +88,8 @@ export function TestSessionProvider({ children }) {
     // User already sees thank you screen, so they won't retry or refresh
     const saveInBackground = async () => {
       try {
-        // Wait a moment for recording to finalize
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait for recording to finalize (resolves when onstop fires, not a blind timeout)
+        const recordingBlob = await recordingBlobPromise;
 
         const isMockSession = sessionId.startsWith('mock-');
 
@@ -180,9 +182,8 @@ export function TestSessionProvider({ children }) {
           console.error('❌ Error saving validation data:', error);
         }
 
-        // Upload recording
+        // Upload recording (blob was captured when onstop fired, above)
         let recordingUrl = null;
-        const recordingBlob = recording.getRecordingBlob();
         if (recordingBlob) {
           try {
             recordingUrl = await uploadRecording(recordingBlob, sessionId);
@@ -190,6 +191,8 @@ export function TestSessionProvider({ children }) {
           } catch (error) {
             console.error('❌ Failed to upload recording:', error);
           }
+        } else {
+          console.warn('⚠️ No recording blob available — permission may have been denied');
         }
 
         // Complete session
