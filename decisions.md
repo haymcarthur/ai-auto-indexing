@@ -1,5 +1,31 @@
 # Technical Decisions
 
+## Method B Household Visibility (2026-02-19)
+
+### 72. Skip censusData Lookup in Effect 2 for AI Flow (isAIFlow Guard)
+**Date:** 2026-02-19
+**Status:** Implemented ✅
+
+**Decision**: In AddNameInfoSheet's second `useEffect`, add an `isAIFlow` flag (`currentApproach === 'B' && preselectedRecordGroup`) that short-circuits the `censusData.records.find()` lookup and forces the `else if (preselectedRecordGroup)` branch.
+
+**Rationale**: All Ockerman family members exist in the original `censusData` with `isVisible: false`. The `find()` call always succeeds and returns the original 5-person record, which excludes dynamically added people like Christopher. The `preselectedRecordGroup` prop (sourced from NamesInfoSheet's `selectedRecordGroup` local state) is the live, up-to-date record that correctly includes Christopher.
+
+**Files Modified**: `src/components/AddNameInfoSheet.jsx`
+
+---
+
+### 73. Early-Return Guard in Effect 1 for Existing-Person Edits
+**Date:** 2026-02-19
+**Status:** Implemented ✅
+
+**Decision**: In AddNameInfoSheet's first `useEffect` (initializes from `preselectedRecordGroup`), return early when `preselectedPerson && !preselectedPerson.isNew`.
+
+**Rationale**: Effect 1 and Effect 2 share the same dependency array. Effect 1 runs first. Without the guard, it rebuilds `cardData.recordGroup.members` from `preselectedRecordGroup.people` with all relationships set to 'No Relation', then Effect 2 immediately overwrites it with the correct relationship-aware members list. Adding the guard removes the unnecessary first pass and eliminates any risk of Effect 1 silently winning a render race.
+
+**Files Modified**: `src/components/AddNameInfoSheet.jsx`
+
+---
+
 ## AutoSuggest / Household Member Fixes (2026-02-19)
 
 ### 71. Append Newly Created Household Members to remainingPeople Queue

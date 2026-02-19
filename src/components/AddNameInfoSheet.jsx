@@ -16,6 +16,7 @@ import { colors } from "../../ux-zion-library/src/tokens/colors";
 
 export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData, onUpdateCensusData, preselectedRecordGroup, preselectedPerson, onTriggerAISelection, currentApproach }) => {
   const infoSheetContentRef = useRef(null);
+  const latestRecordGroupFormDataRef = useRef(null);
 
   const [cardStates, setCardStates] = useState({
     essentialInfo: 'add',
@@ -34,6 +35,16 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
   // Initialize with preselected record group if provided
   useEffect(() => {
+    console.log('[Effect1] running, preselectedPerson:', preselectedPerson?.givenName, 'isNew:', preselectedPerson?.isNew);
+    // When editing an existing person (preselectedPerson set and not new),
+    // the second useEffect handles full initialization — skip here to avoid
+    // overwriting its correctly-built members list (which may include dynamically
+    // added people like Christopher who aren't in the original censusData record).
+    if (preselectedPerson && !preselectedPerson.isNew) {
+      console.log('[Effect1] early return: existing person, letting Effect2 handle it');
+      return;
+    }
+
     if (preselectedRecordGroup) {
 
       // Find the actual record from census data to get record-level data
@@ -81,26 +92,33 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       } else {
       }
     }
-  }, [preselectedRecordGroup, censusData]);
+  }, [preselectedRecordGroup, censusData, preselectedPerson]);
 
   // Initialize with preselected person from highlight selection (AI flow)
   useEffect(() => {
+    console.log('[Effect2] running, preselectedPerson:', preselectedPerson?.givenName, 'isNew:', preselectedPerson?.isNew, 'preselectedRecordGroup people count:', preselectedRecordGroup?.people?.length, 'currentApproach:', currentApproach);
     if (!preselectedPerson) {
+      console.log('[Effect2] early return: no preselectedPerson');
       return;
     }
 
     // Check if this is a new person being added
     if (preselectedPerson.isNew) {
       // Don't change cardStates or cardData - leave as default (essentialInfo: 'add', others: 'pending')
+      console.log('[Effect2] early return: isNew');
       return;
     }
 
     // Existing person - set up for editing/review
 
     // Find the record containing this person in censusData
-    const record = censusData.records.find(r =>
+    // For AI review flow (Task B), skip this lookup and use preselectedRecordGroup directly,
+    // since it contains up-to-date data including any dynamically added people (e.g. Christopher)
+    const isAIFlow = currentApproach === 'B' && preselectedRecordGroup;
+    const record = !isAIFlow && censusData.records.find(r =>
       r.people.some(p => p.id === preselectedPerson.id)
     );
+    console.log('[Effect2] isAIFlow:', isAIFlow, 'record found:', !!record, 'preselectedRecordGroup people:', preselectedRecordGroup?.people?.map(p => p.givenName));
 
     if (record) {
         // Get all people in this record for household members
@@ -185,6 +203,8 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         // Person not found in censusData - must be from AI review flow
         // Use preselectedRecordGroup to populate the cards
 
+        console.log('[Effect2] else-if branch: preselectedRecordGroup.people:', preselectedRecordGroup.people.map(p => p.givenName));
+
         // Get all people in this record group for household members (excluding current person)
         const householdMembers = preselectedRecordGroup.people
           .filter(p => p.id !== preselectedPerson.id)
@@ -207,6 +227,8 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
               id: person.id // Add person ID for bidirectional updates
             };
           });
+
+        console.log('[Effect2] householdMembers computed:', householdMembers.map(m => m.name));
 
         // Find the primary person name for record group label
         const primaryPerson = preselectedRecordGroup.people.find(p => p.isPrimary);
@@ -708,16 +730,23 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
   };
 
   const handleSaveAndClose = () => {
+    // If RecordGroupCard is in edit mode and the user hasn't clicked its own Save button,
+    // use the latest in-progress formData from the ref so relationship changes aren't lost.
+    const effectiveRecordGroup =
+      (cardStates.recordGroup === 'edit' && latestRecordGroupFormDataRef.current)
+        ? latestRecordGroupFormDataRef.current
+        : cardData.recordGroup;
+
     // Save the current person to the saved people list
     const currentPersonName = getCurrentPersonName();
     const currentPersonData = {
       name: currentPersonName,
-      relationships: cardData.recordGroup.members || [],
+      relationships: effectiveRecordGroup.members || [],
       essentialInfo: cardData.essentialInfo,
       primaryEvent: cardData.primaryEvent,
       additionalEvents: cardData.additionalEvents,
       additionalFacts: cardData.additionalFacts,
-      recordGroup: cardData.recordGroup
+      recordGroup: effectiveRecordGroup
     };
 
     // Task B (AI review flow): If onSaveAndReturn exists AND we're in Task B, build person and return directly
@@ -2309,11 +2338,15 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
             censusData={censusData}
             currentPersonName={getCurrentPersonName()}
             onEdit={() => handleEditCard('recordGroup')}
-            onSave={(formData) => handleSaveCard('recordGroup', formData)}
+            onSave={(formData) => {
+              latestRecordGroupFormDataRef.current = null;
+              handleSaveCard('recordGroup', formData);
+            }}
             onNext={(formData) => handleNextCard('recordGroup', formData)}
             onCancel={() => handleCancelEdit('recordGroup')}
             onNewPersonCreated={handleNewPersonCreated}
             onRecordGroupSelected={handleRecordGroupSelected}
+            onMembersChange={(formData) => { latestRecordGroupFormDataRef.current = formData; }}
           />
         </div>
 

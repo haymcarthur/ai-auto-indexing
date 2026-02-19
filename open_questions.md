@@ -2,6 +2,15 @@
 
 ## Pending Issues (2026-02-19)
 
+### 12. Method B: Christopher Still Missing from Household Details When Editing Subsequent People – IN PROGRESS 🔍
+**Date Identified**: 2026-02-19
+**Location**: AddNameInfoSheet.jsx — Effect 2 (`else if (preselectedRecordGroup)` branch)
+**Issue**: After adding Christopher to John's card in the AI review flow, Christopher correctly appears in the "Household Members" section of each AIReviewInfoSheet card, but does NOT appear in the RecordGroupCard (Household Details) within AddNameInfoSheet when clicking Edit on subsequent household members.
+**Root Cause**: Two fixes applied — `isAIFlow` guard and Effect 1 early-return — but bug still reproducible. Temporary console.log instrumentation added to Effect 1, Effect 2, and `RecordGroupCard.renderReviewState` to trace exactly where Christopher drops out of the pipeline. Awaiting runtime output.
+**Status**: 🔍 Instrumentation committed; user testing in progress
+
+---
+
 ### 11. Manually Added Household Member Not Getting Own Review Card - RESOLVED ✅
 **Date Identified**: 2026-02-19
 **Date Resolved**: 2026-02-19

@@ -1,5 +1,15 @@
 # Changelog - Current Work
 
+## Session (2026-02-19 – Method B Household Visibility)
+
+### Fixed (In Progress)
+- **Method B: Christopher missing from Household Details when editing subsequent people** (AddNameInfoSheet.jsx)
+  - Added `isAIFlow` guard in Effect 2 to force `else if (preselectedRecordGroup)` branch for Task B, bypassing the stale `censusData` lookup that excluded dynamically-added members
+  - Added early-return guard in Effect 1 for existing-person edits so it no longer overwrites Effect 2's correctly-built members list
+  - Added temporary console.log instrumentation across Effect 1, Effect 2, and `RecordGroupCard.renderReviewState` to trace the pipeline
+
+---
+
 ## Session (2026-02-03 Evening)
 
 ### Fixed

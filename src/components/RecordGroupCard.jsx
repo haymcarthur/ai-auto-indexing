@@ -46,7 +46,8 @@ export const RecordGroupCard = ({
   onEdit,
   onDelete,
   onNewPersonCreated,
-  onRecordGroupSelected
+  onRecordGroupSelected,
+  onMembersChange
 }) => {
   const [formData, setFormData] = useState({
     recordGroup: data.recordGroup || null,
@@ -254,6 +255,7 @@ export const RecordGroupCard = ({
   };
 
   const renderReviewState = () => {
+    console.log('[RecordGroupCard] renderReviewState, data.members:', data.members?.map(m => m.name));
     if (!data.recordGroup) return null;
 
     return (
@@ -426,7 +428,9 @@ export const RecordGroupCard = ({
                   onChange={(e) => {
                     const newMembers = [...formData.members];
                     newMembers[index].relationship = e.target.value;
-                    setFormData(prev => ({ ...prev, members: newMembers }));
+                    const updatedFormData = { ...formData, members: newMembers };
+                    setFormData(updatedFormData);
+                    onMembersChange?.(updatedFormData);
                   }}
                 >
                   {RELATIONSHIPS.map(rel => (
@@ -564,5 +568,6 @@ RecordGroupCard.propTypes = {
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   onNewPersonCreated: PropTypes.func,
-  onRecordGroupSelected: PropTypes.func
+  onRecordGroupSelected: PropTypes.func,
+  onMembersChange: PropTypes.func
 };
