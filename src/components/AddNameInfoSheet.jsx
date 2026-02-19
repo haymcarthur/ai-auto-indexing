@@ -766,6 +766,49 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       };
 
       onSaveAndReturn(personToReturn);
+
+      // Also surface any NEW household members as separate people in the review list
+      // A member is "new" if they are not already in preselectedRecordGroup.people
+      const existingMemberNames = (preselectedRecordGroup?.people || []).map(p =>
+        `${p.givenName} ${p.surname}`.trim().toLowerCase()
+      );
+      const newMembers = (currentPersonData.recordGroup?.members || []).filter(member => {
+        if (!member.name?.trim()) return false;
+        return !existingMemberNames.includes(member.name.trim().toLowerCase());
+      });
+
+      newMembers.forEach(member => {
+        const nameParts = member.name.trim().split(' ');
+        const givenName = nameParts[0] || '';
+        const surname = nameParts.slice(1).join(' ') || '';
+        const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // member.relationship (e.g. "Child") is how the member relates TO the current person
+        // Invert it to get the current person's role TOWARD the member (e.g. "Parent")
+        const inverseRole = getInverseRelationship(member.relationship || 'No Relation');
+
+        const newMemberPerson = {
+          id: tempId,
+          givenName,
+          surname,
+          sex: '',
+          age: '',
+          race: '',
+          isPrimary: false,
+          isVisible: true,
+          relationships: [{
+            type: getRelationshipType(inverseRole.toUpperCase()),
+            role: inverseRole.toUpperCase(),
+            relatedPersonId: personToReturn.id,
+            relatedPersonName: `${personToReturn.givenName} ${personToReturn.surname}`.trim()
+          }],
+          attachedPersons: [],
+          hints: []
+        };
+
+        onSaveAndReturn(newMemberPerson);
+      });
+
       return; // Exit early - don't process censusData for Task B
     }
 
