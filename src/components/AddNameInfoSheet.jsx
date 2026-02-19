@@ -780,9 +780,9 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         const givenName = nameParts[0] || '';
         const surname = nameParts.slice(1).join(' ') || '';
         const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        // member.relationship (e.g. "Child") is how the member relates TO the current person
-        // Invert it to get the new member's role TOWARD the current person (e.g. "Parent")
-        const inverseRole = getInverseRelationship(member.relationship || 'No Relation');
+        // member.relationship (e.g. "Child") IS the new member's own role toward the current person.
+        // e.g. Christopher listed as "Child" under John → Christopher's role is CHILD (not inverted)
+        const memberRole = (member.relationship || 'No Relation').toUpperCase();
         return {
           id: tempId,
           givenName,
@@ -793,8 +793,8 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           isPrimary: false,
           isVisible: true,
           relationships: [{
-            type: getRelationshipType(inverseRole.toUpperCase()),
-            role: inverseRole.toUpperCase(),
+            type: getRelationshipType(memberRole),
+            role: memberRole,
             relatedPersonId: personToReturn.id,
             relatedPersonName: `${personToReturn.givenName} ${personToReturn.surname}`.trim()
           }],
