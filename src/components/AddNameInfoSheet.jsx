@@ -1568,6 +1568,13 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       return;
     }
 
+    // DEBUG: log the state of updatedCensusData before loading next person
+    const debugRecord = updatedCensusData.records.find(r => r.id === cardData.recordGroup?.existingRecordId);
+    console.log('[handleSaveAndContinue DEBUG] existingRecordId:', cardData.recordGroup?.existingRecordId);
+    console.log('[handleSaveAndContinue DEBUG] record found:', !!debugRecord);
+    console.log('[handleSaveAndContinue DEBUG] people in record:', debugRecord?.people?.map(p => `${p.givenName} ${p.surname}`.trim() + ' (visible=' + p.isVisible + ')'));
+    console.log('[handleSaveAndContinue DEBUG] cardData.recordGroup.members:', cardData.recordGroup?.members?.map(m => m.name));
+
     const nextPersonName = remainingPeople[0];
 
     // Normalize nextPersonName to a string (it could be an object for new people)
@@ -1740,6 +1747,7 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
     // Get all people from this record
     const allPeople = foundRecord.people;
+    console.log('[handleSaveAndContinue DEBUG] next person:', nextPersonNameStr, '| allPeople in their record:', allPeople.map(p => `${p.givenName} ${p.surname}`.trim()));
 
     // Find primary person in household (check both isPrimary flag and relationship='Primary')
     const primaryPerson = allPeople.find(p => p.isPrimary || p.relationship === 'Primary') || allPeople[0] || foundPerson;
