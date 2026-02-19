@@ -1494,21 +1494,36 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
           });
           censusDataWasUpdated = true;
 
-          // CRITICAL: Update remainingPeople with temp IDs so we can find them by ID later
-          setRemainingPeople(prev => prev.map(person => {
-            if (typeof person === 'object' && !person.id) {
-              // Find the corresponding temp person we just created
-              const personFullName = `${person.givenName} ${person.surname || ''}`.trim();
-              const tempPerson = newPeopleToAdd.find(tp => {
-                const tpFullName = `${tp.givenName} ${tp.surname || ''}`.trim();
-                return tpFullName === personFullName;
-              });
-              if (tempPerson) {
-                return { ...person, id: tempPerson.id };
+          // CRITICAL: Update remainingPeople with temp IDs AND add newly created people to queue
+          setRemainingPeople(prev => {
+            // Update existing people with temp IDs (for people already in queue as objects without IDs)
+            const updated = prev.map(person => {
+              if (typeof person === 'object' && !person.id) {
+                const personFullName = `${person.givenName} ${person.surname || ''}`.trim();
+                const tempPerson = newPeopleToAdd.find(tp => {
+                  const tpFullName = `${tp.givenName} ${tp.surname || ''}`.trim();
+                  return tpFullName === personFullName;
+                });
+                if (tempPerson) {
+                  return { ...person, id: tempPerson.id };
+                }
               }
-            }
-            return person;
-          }));
+              return person;
+            });
+
+            // Add newly created people to the end of the queue (avoid duplicates)
+            const existingNames = updated.map(p =>
+              typeof p === 'string' ? p.toLowerCase() : `${p.givenName} ${p.surname || ''}`.trim().toLowerCase()
+            );
+            const newQueueEntries = newPeopleToAdd
+              .filter(np => {
+                const fullName = `${np.givenName} ${np.surname || ''}`.trim().toLowerCase();
+                return !existingNames.includes(fullName);
+              })
+              .map(np => ({ givenName: np.givenName, surname: np.surname, id: np.id }));
+
+            return [...updated, ...newQueueEntries];
+          });
         }
 
         // ALSO update bidirectional relationships for ALL members (including newly created ones)
@@ -1568,12 +1583,6 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
       return;
     }
 
-    // DEBUG: log the state of updatedCensusData before loading next person
-    const debugRecord = updatedCensusData.records.find(r => r.id === cardData.recordGroup?.existingRecordId);
-    console.log('[handleSaveAndContinue DEBUG] existingRecordId:', cardData.recordGroup?.existingRecordId);
-    console.log('[handleSaveAndContinue DEBUG] record found:', !!debugRecord);
-    console.log('[handleSaveAndContinue DEBUG] people in record:', debugRecord?.people?.map(p => `${p.givenName} ${p.surname}`.trim() + ' (visible=' + p.isVisible + ')'));
-    console.log('[handleSaveAndContinue DEBUG] cardData.recordGroup.members:', cardData.recordGroup?.members?.map(m => m.name));
 
     const nextPersonName = remainingPeople[0];
 
@@ -1747,7 +1756,6 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
     // Get all people from this record
     const allPeople = foundRecord.people;
-    console.log('[handleSaveAndContinue DEBUG] next person:', nextPersonNameStr, '| allPeople in their record:', allPeople.map(p => `${p.givenName} ${p.surname}`.trim()));
 
     // Find primary person in household (check both isPrimary flag and relationship='Primary')
     const primaryPerson = allPeople.find(p => p.isPrimary || p.relationship === 'Primary') || allPeople[0] || foundPerson;
