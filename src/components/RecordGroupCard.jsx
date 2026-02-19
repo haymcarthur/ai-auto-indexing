@@ -255,7 +255,6 @@ export const RecordGroupCard = ({
   };
 
   const renderReviewState = () => {
-    console.log('[RecordGroupCard] renderReviewState, data.members:', data.members?.map(m => m.name));
     if (!data.recordGroup) return null;
 
     return (

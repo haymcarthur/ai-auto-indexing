@@ -35,13 +35,11 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
   // Initialize with preselected record group if provided
   useEffect(() => {
-    console.log('[Effect1] running, preselectedPerson:', preselectedPerson?.givenName, 'isNew:', preselectedPerson?.isNew);
     // When editing an existing person (preselectedPerson set and not new),
     // the second useEffect handles full initialization — skip here to avoid
     // overwriting its correctly-built members list (which may include dynamically
     // added people like Christopher who aren't in the original censusData record).
     if (preselectedPerson && !preselectedPerson.isNew) {
-      console.log('[Effect1] early return: existing person, letting Effect2 handle it');
       return;
     }
 
@@ -96,16 +94,13 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
 
   // Initialize with preselected person from highlight selection (AI flow)
   useEffect(() => {
-    console.log('[Effect2] running, preselectedPerson:', preselectedPerson?.givenName, 'isNew:', preselectedPerson?.isNew, 'preselectedRecordGroup people count:', preselectedRecordGroup?.people?.length, 'currentApproach:', currentApproach);
     if (!preselectedPerson) {
-      console.log('[Effect2] early return: no preselectedPerson');
       return;
     }
 
     // Check if this is a new person being added
     if (preselectedPerson.isNew) {
       // Don't change cardStates or cardData - leave as default (essentialInfo: 'add', others: 'pending')
-      console.log('[Effect2] early return: isNew');
       return;
     }
 
@@ -118,8 +113,6 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
     const record = !isAIFlow && censusData.records.find(r =>
       r.people.some(p => p.id === preselectedPerson.id)
     );
-    console.log('[Effect2] isAIFlow:', isAIFlow, 'record found:', !!record, 'preselectedRecordGroup people:', preselectedRecordGroup?.people?.map(p => p.givenName));
-
     if (record) {
         // Get all people in this record for household members
         const householdMembers = record.people
@@ -203,8 +196,6 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
         // Person not found in censusData - must be from AI review flow
         // Use preselectedRecordGroup to populate the cards
 
-        console.log('[Effect2] else-if branch: preselectedRecordGroup.people:', preselectedRecordGroup.people.map(p => p.givenName));
-
         // Get all people in this record group for household members (excluding current person)
         const householdMembers = preselectedRecordGroup.people
           .filter(p => p.id !== preselectedPerson.id)
@@ -227,8 +218,6 @@ export const AddNameInfoSheet = ({ onBack, onClose, onSaveAndReturn, censusData,
               id: person.id // Add person ID for bidirectional updates
             };
           });
-
-        console.log('[Effect2] householdMembers computed:', householdMembers.map(m => m.name));
 
         // Find the primary person name for record group label
         const primaryPerson = preselectedRecordGroup.people.find(p => p.isPrimary);
