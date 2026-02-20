@@ -1,5 +1,50 @@
 # Technical Decisions
 
+## Recording Pipeline Fixes (2026-02-20)
+
+### 74. Promise-Based stopRecording() to Eliminate Race Condition
+**Date:** 2026-02-20
+**Status:** Implemented ✅
+
+**Decision**: Change `stopRecording()` to return a `Promise` that resolves when `onstop` fires (with a 5-second safety timeout), rather than using a blind 1-second `setTimeout`.
+
+**Rationale**: `MediaRecorder.stop()` is asynchronous — `onstop` fires some time later once all pending `ondataavailable` events have drained. The prior 1-second wait was a fragile proxy that could expire before the blob was ready, producing missing or truncated recordings.
+
+**Implementation**:
+- Added `stopResolveRef = useRef(null)` to hold the Promise resolve function
+- `onstop` handler calls `stopResolveRef.current(blob)` if a pending resolve exists
+- `stopRecording()` returns `Promise.resolve(recordingBlobRef.current)` immediately if recorder is not active; otherwise creates a new Promise, sets `stopResolveRef.current`, starts a 5-second timeout, then calls `mediaRecorderRef.current.stop()`
+
+**Files Modified**: `src/hooks/useScreenRecording.js`
+
+---
+
+### 75. Remove Manual Chunk Snapshot from onended Handler
+**Date:** 2026-02-20
+**Status:** Implemented ✅
+
+**Decision**: Remove the manual `chunksRef` → `partialRecordingsRef` snapshot from the `onended` handler (triggered when user stops screen share via browser UI). Let `onstop` be the sole source of blob creation.
+
+**Rationale**: `onended` was snapshotting `chunksRef` to `partialRecordingsRef` as a backup, then called `mediaRecorder.stop()` which fired `onstop` — which saved the same chunks again. `getRecordingBlob()` concatenated both halves, producing an invalid double-length WebM. Since `onstop` always fires after `stop()`, the manual snapshot was redundant and harmful.
+
+**Implementation**: Removed `partialRecordingsRef` entirely. `onended` now only calls `mediaRecorder.stop()` (if still recording) and updates `recordingStopped`/`isRecording` state. Simplified `getRecordingBlob()` to just return `recordingBlobRef.current`.
+
+**Files Modified**: `src/hooks/useScreenRecording.js`
+
+---
+
+### 76. Decouple DB Saves from Recording Blob in saveInBackground
+**Date:** 2026-02-20
+**Status:** Implemented ✅
+
+**Decision**: In `saveInBackground` (TestSessionContext.jsx), `await recordingBlobPromise` must be placed immediately before the upload call — AFTER all task completion, survey, and validation saves.
+
+**Rationale**: Task completions, survey responses, and validation data are independent of the recording. Awaiting the recording blob at the top of `saveInBackground` blocks all DB saves, causing empty dashboard results if recording takes time to finalize. By the time the upload is attempted, all other saves have already completed and `onstop` has had ample time to fire.
+
+**Files Modified**: `src/contexts/TestSessionContext.jsx`
+
+---
+
 ## Method B Household Visibility (2026-02-19)
 
 ### 72. Skip censusData Lookup in Effect 2 for AI Flow (isAIFlow Guard)

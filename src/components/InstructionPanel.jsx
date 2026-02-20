@@ -226,7 +226,7 @@ export function InstructionPanel({
       content: (
         <div>
           <p style={{ marginBottom: spacing.xs }}>
-            Thank you for participating in this study. You will be testing two different methods that use AI to help you index names on a historical document.
+            Thank you for participating in this study. You will be testing two different methods (prompt and highlight methods) in order to index your ancestor and his family who you have found on this historical document.
           </p>
           <div style={{
             padding: spacing.sm,
@@ -286,10 +286,10 @@ export function InstructionPanel({
       content: (
         <div>
           <p style={{ marginBottom: spacing.sm }}>
-            You have found your ancestor "John Ockerman" on this Kentucky Census Record along with 3 other John Ockermans. Your ancestor is married to Reamy and has 4 children. Your task is to use this method to index John along with his wife and 4 children.
+            You have found your ancestor <strong>"John Ockerman"</strong> on this Kentucky Census Record along with 3 other John Ockermans. Your ancestor is married to Reamy and has 4 children.
           </p>
-          <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray70 }}>
-            While there is AI that can assist with this task, the AI can get the information wrong so make sure you double check all of the details to make sure they are captured correctly.
+          <p style={{ marginBottom: spacing.sm }}>
+            Your task is to use this {taskOrder[0].toLowerCase()} method to <strong>ACCURATELY</strong> index <strong>ALL</strong> of the information for John along with his wife and 4 children.
           </p>
           <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray60 }}>
             <strong>Tip:</strong> You can reopen this panel at any time by clicking the tab on the left side.
@@ -406,10 +406,10 @@ export function InstructionPanel({
       content: (
         <div>
           <p style={{ marginBottom: spacing.sm }}>
-            You have found your ancestor "John Ockerman" on this Kentucky Census Record along with 3 other John Ockermans. Your ancestor is married to Reamy and has 4 children. Your task is to use this method to index John along with his wife and 4 children.
+            You have found your ancestor <strong>"John Ockerman"</strong> on this Kentucky Census Record along with 3 other John Ockermans. Your ancestor is married to Reamy and has 4 children.
           </p>
-          <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray70 }}>
-            While there is AI that can assist with this task, the AI can get the information wrong so make sure you double check all of the details to make sure they are captured correctly.
+          <p style={{ marginBottom: spacing.sm }}>
+            Your task is to use this {taskOrder[1].toLowerCase()} method to <strong>ACCURATELY</strong> index <strong>ALL</strong> of the information for John along with his wife and 4 children.
           </p>
           <p style={{ marginBottom: spacing.sm, fontSize: '14px', color: colors.gray.gray60 }}>
             <strong>Tip:</strong> You can reopen this panel at any time by clicking the tab on the left side.

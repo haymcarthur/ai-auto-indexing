@@ -1,5 +1,16 @@
 # Open Questions & Issues
 
+## Pending Issues (2026-02-20)
+
+### 13. One Test Session with Incomplete Data in Supabase
+**Date Identified**: 2026-02-20
+**Status**: Known / Not Recoverable
+**Issue**: One test session ran during the window when `await recordingBlobPromise` was at the top of `saveInBackground`, blocking all DB saves. The `test_sessions` row was created (app init is independent of `handleTaskComplete`) but `task_completions`, `survey_responses`, `task_validation_data`, and `recording_url` were never saved.
+**Recovery**: Not possible — data was never transmitted to the server. The stub `test_sessions` row can be found by sorting `test_sessions` by `started_at DESC` and deleted for a clean dashboard.
+**Prevention**: Fixed in commit c17c3e8 — `await recordingBlobPromise` now placed after all DB saves.
+
+---
+
 ## Pending Issues (2026-02-19)
 
 ### 12. Method B: Christopher Missing from Household Details When Editing Subsequent People – RESOLVED ✅

@@ -1,5 +1,24 @@
 # Changelog - Current Work
 
+## Session (2026-02-20 – Recording Pipeline Fixes)
+
+### Fixed
+- **Recording race condition** (useScreenRecording.js)
+  - `stopRecording()` previously fired `mediaRecorder.stop()` then used a blind 1-second `setTimeout` as a proxy for when the blob was ready
+  - `onstop` fires asynchronously — the 1-second wait could expire before the blob existed
+  - Fix: `stopRecording()` now returns a `Promise` that resolves when `onstop` fires, with a 5-second safety timeout fallback
+
+- **Duplicate WebM chunks producing invalid recordings** (useScreenRecording.js)
+  - The `onended` handler (user stops screen share via browser UI) was manually snapshotting `chunksRef` to `partialRecordingsRef`, then called `mediaRecorder.stop()` which fired `onstop` saving the same chunks again
+  - `getRecordingBlob()` concatenated both halves → invalid WebM
+  - Fix: Removed manual chunk snapshot from `onended`; let `onstop` handle blob creation exclusively. Removed `partialRecordingsRef` entirely.
+
+- **All dashboard data missing after recording fix** (TestSessionContext.jsx)
+  - After introducing `recordingBlobPromise`, `await recordingBlobPromise` was placed at the **top** of `saveInBackground`, gating all DB saves (task completions, survey, validation) behind recording completion
+  - Fix: Moved `await recordingBlobPromise` to just before the upload, after all other DB saves complete
+
+---
+
 ## Session (2026-02-19 – Method B Household Visibility)
 
 ### Fixed
