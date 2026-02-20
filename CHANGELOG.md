@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-02-20 - Task Instruction Rewrite
+
+### Changed Task Instructions ✅
+- Welcome screen: removed AI-framing language, now describes study as indexing ancestor's family using "prompt and highlight methods"
+- Task 1 & Task 2: "John Ockerman" bolded, split into two paragraphs (context + task directive), added **ACCURATELY** and **ALL** emphasis, removed AI-makes-mistakes warning paragraph entirely
+- Instructions now let testers discover the AI functionality naturally rather than priming them to expect it
+
+### Files Modified
+- `src/components/InstructionPanel.jsx` — steps 0, 1, and 4 content
+
+---
+
+## 2026-02-20 - Recording Pipeline Fixes
+
+### Fixed Recording Race Condition ✅
+- `stopRecording()` previously used a blind 1-second `setTimeout` as a proxy; `onstop` can fire later, producing missing/truncated recordings
+- Fix: `stopRecording()` now returns a `Promise` that resolves when `onstop` fires (5-second safety timeout fallback)
+
+### Fixed Duplicate WebM Chunks ✅
+- `onended` handler was snapshotting `chunksRef` to `partialRecordingsRef` before calling `mediaRecorder.stop()`, which fired `onstop` saving the same chunks again — resulting in an invalid double-length WebM
+- Fix: Removed manual snapshot entirely. `onstop` is now the sole source of blob creation. `partialRecordingsRef` removed.
+
+### Fixed DB Saves Blocked by Recording Blob ✅
+- `await recordingBlobPromise` was placed at the top of `saveInBackground`, gating all DB saves behind recording completion
+- Fix: Moved `await recordingBlobPromise` to just before the upload, after all task/survey/validation saves
+
+### Files Modified
+- `src/hooks/useScreenRecording.js`
+- `src/contexts/TestSessionContext.jsx`
+
+---
+
+## 2026-02-19 - Method B Household Visibility Fix
+
+### Fixed Christopher Missing from Household Details (Method B) ✅
+- After adding Christopher to John's card, he appeared in AIReviewInfoSheet's Household Members list but NOT in RecordGroupCard when clicking Edit on other household members
+- Root cause: Effect 2's `censusData.records.find()` always found the original 5-person record (all Ockermans in censusData with `isVisible: false`), bypassing the `preselectedRecordGroup` branch that holds the live updated record
+- Fix 1: `isAIFlow` guard short-circuits the censusData lookup for Task B
+- Fix 2: Effect 1 early-return when `preselectedPerson && !preselectedPerson.isNew` prevents it from overwriting Effect 2's output
+
+### Files Modified
+- `src/components/AddNameInfoSheet.jsx`
+
+---
+
 ## 2026-02-19 - Manually Added Member Now Gets Own Review Card
 
 ### Fixed Manually Added Household Member Not Appearing in Review Queue ✅

@@ -1,21 +1,45 @@
 # AI Auto-Index Project Overview
 
 ## Project Goal
-Build a web application for indexing and managing Kentucky 1850 census records with person-to-person relationship tracking and FamilySearch integration.
 
-## Core Functionality
-- Display census records with person names and relationships
-- Track direct person-to-person relationships (parent-child, siblings, spouses, etc.)
-- Manage primary person designation for each household
-- Edit person details and relationships
-- Visual distinction for primary people in lists
-- Record grouping by household
+A user-study prototype for FamilySearch UX research. Participants complete two genealogical indexing tasks using two AI-assisted methods (Prompt and Highlight) so researchers can compare usability, accuracy, and user preference. The app records screen+audio, tracks task completion, and submits structured analytics to Supabase.
+
+This is **not** a production indexing tool — it is a research prototype. Correctness of instructions and minimal AI framing of the task are intentional constraints.
+
+---
 
 ## Technology Stack
-- **Frontend**: React with Vite
-- **Data Processing**: Python script (simplify-census-data.py)
-- **UI Components**: Custom UX Zion Library
-- **Data Format**: Simplified JSON transformed from complex FamilySearch format
+
+- **Frontend**: React + Vite
+- **UI Components**: `ux-zion-library` (local, relative import `../../ux-zion-library`)
+- **Backend / DB**: Supabase (same instance for dev and production)
+- **Recording**: MediaRecorder API (screen + microphone)
+- **Deployment**: Vercel (auto-deploy on push to `main`)
+- **Production URL**: https://ai-auto-indexing.vercel.app/
+- **Dev server**: `npm run dev` → http://localhost:5173
+
+---
+
+## Two Test Methods
+
+### Method A — Prompt Method
+1. User opens Names panel → clicks "Add Name"
+2. Types ancestor's name → selects "Use AI auto fill"
+3. Loading screen → list of matching record groups
+4. Selects a record group → AIReviewInfoSheet shows all people
+5. Reviews/edits each person → saves all to census data
+
+### Method B — Highlight Method
+1. User selects Task B → census document displayed with calibrated highlight overlays
+2. User clicks a highlight → "Finding Details" loading (2s)
+3. AIReviewInfoSheet shows all people in that record group sequentially
+4. Active card: Edit / Looks Good / Trash. Reviewed cards: Edit only
+5. After last person, Review card activates → Add Person or Save and Close
+6. All people saved → Names panel opens
+
+Task order (Prompt first vs Highlight first) is randomised per participant via `taskOrder` state in InstructionPanel.
+
+---
 
 ## Key Data Structures
 
@@ -26,142 +50,92 @@ Build a web application for indexing and managing Kentucky 1850 census records w
   "givenName": "John",
   "surname": "Ockerman",
   "relationship": "Child",
-  "sex": "",
+  "sex": "M",
   "age": "31",
   "race": "",
   "isPrimary": true,
+  "isVisible": false,
   "relationships": [
     {
       "type": "PARENT_CHILD",
       "role": "PARENT",
-      "relatedPersonId": "other-person-id",
+      "relatedPersonId": "other-id",
       "relatedPersonName": "Christopher Ockerman"
     }
-  ],
-  "attachedPersons": [],
-  "hints": []
+  ]
 }
 ```
 
-### Relationship Storage
-- **Bidirectional**: Each person stores their relationships from their perspective
-- **Person-level**: `relationships` array on each person
-- **Record-level**: `relationshipGraph` array on each record
-- **Roles**: PARENT, CHILD, SIBLING, SPOUSE, GRANDPARENT, GRANDCHILD, etc.
+- `isVisible`: `false` = AI-extracted (hidden until reviewed), `true` = user-confirmed
+- `isNew`: ephemeral flag indicating a brand-new person being added in the current flow
+- Relationships are bidirectional — each person carries their own perspective
 
-## Current Scope
-- 4 census records with 22 total people
-- Kentucky 1850 census data
-- Person-to-person relationship tracking
-- Primary person management
-- Essential information editing
-- Relationship display in record group cards
+---
 
-## Constraints
-- One primary person per household
-- Primary people get bold text emphasis (no background color)
-- Relationships displayed from active person's perspective
-- Data transformations require Python script re-run + app reload
+## Census Data
 
-## Task A vs Task B Testing Flows
+- File: `KentuckyCensus-simple.json`
+- 4 records, 22 people, Kentucky 1850 census
+- John Ockerman's household: John, Heamy/Reamy, Isaic, Joseph, George, Christopher
+- **Intentional errors in data** for testing: John's age (37 instead of 31), spouse name "Heamy" instead of "Reamy", Christopher omitted from raw data
+- All Ockerman family members exist in censusData with `isVisible: false` — they are NOT removed from the data, they are just hidden
 
-### Task A: AI Auto-Fill Flow
-1. User opens Names panel (shows "No Names")
-2. Clicks "Add Name" button
-3. Enters given name and/or surname
-4. Selects "Use AI auto fill" option
-5. Loading screen appears (simulating AI search)
-6. List of matching record groups displayed
-7. User selects a record group
-8. AIReviewInfoSheet shows all people in selected group
-9. User reviews each person, can edit or mark as correct
-10. Saves all people to census data
+---
 
-### Task B: Highlight-Based AI Review Flow
-1. User selects Task B approach
-2. Document image displayed with calibrated highlight overlays
-3. User clicks on a highlight
-4. "Finding Details" loading screen appears (2 seconds)
-5. AIReviewInfoSheet shows all people in highlighted record group
-6. User reviews each person sequentially:
-   - Active card (yellow): Shows "Edit" and "Looks Good" buttons + Trash icon
-   - Reviewed cards (grey): Shows "Edit" button only
-7. After reviewing last person, Review card becomes active
-8. Review card shows "Add Person" and "Save and Close" buttons
-9. User can add additional people or save and close
-10. All people saved to census data, Names panel opens
+## Critical Architecture Constraints
 
-## Current Status (2026-02-17)
+| Constraint | Detail |
+|---|---|
+| Task A and B are independent | Changes to one must not affect the other |
+| `currentApproach === 'B'` guard | Required wherever Task B needs different behaviour |
+| `isAIFlow` guard in AddNameInfoSheet Effect 2 | Forces `preselectedRecordGroup` branch for Task B, bypasses `censusData.records.find()` |
+| Effect 1 early-return | `if (preselectedPerson && !preselectedPerson.isNew) return` — prevents Effect 1 overwriting Effect 2 |
+| `isVisible` filtering | Always filter by `isVisible: true` when searching for manually-created people |
+| Immutable census data updates | Never mutate censusData arrays directly — spread to new objects |
+| Recording blob ordering | `await recordingBlobPromise` must come AFTER all DB saves in `saveInBackground` |
+| DB saves are fire-and-forget | `setTestComplete(true)` fires first; DB saves run in background |
 
-### ✅ All Previous Bugs Resolved - Ready for User Testing
+---
 
-**Latest Updates (2026-02-17)**:
-- ✅ User testing bug fixes from Sessions 1-2 deployed (relationship inversion, name filtering, dialogs, scroll, highlights)
-- ✅ Instant thank you screen implemented - users no longer wait 10-30 seconds on submission
-- ✅ Background save pattern prevents lost work from page refreshes
-- ✅ All production deployment issues resolved (Session 11)
+## Supabase Tables
 
-**Production Status**:
-- ✅ Production URL: https://ai-auto-indexing.vercel.app/
-- ✅ All builds passing on Vercel
-- ✅ All user-reported bugs fixed and deployed
-- ✅ Task A (Prompt method) fully functional
-- ✅ Task B (Highlight method) fully functional
-- ✅ Dashboard integration working with status parameters
-- ✅ Analytics tracking accurate data
-- ✅ **No blocking issues**
+| Table | Purpose |
+|---|---|
+| `test_sessions` | One row per participant; `project_status` from `?status=` URL param |
+| `task_completions` | Two rows per session (one per method); `task_id` = 'A' (Prompt) or 'B' (Highlight) |
+| `survey_responses` | `preferred_method` + `preference_reason` (overall feedback) |
+| `task_validation_data` | Raw JSON dump of validation results + all survey responses |
+| `test-recordings` storage | WebM files at `ai-auto-index/{sessionId}_{timestamp}.webm` |
 
-## Previous Work (Session 10 Continuation - Completed)
+`task_id` and `preferred_method` have DB check constraints — only 'A', 'B', 'C' are valid. Map 'Prompt'→'A', 'Highlight'→'B' before saving.
 
-### ✅ Analytics Integration & Validation Fixes Complete
+---
 
-**Session 10 - Analytics Data Flow Refactor**:
-- Accumulated response submission pattern (all tasks + final questions together)
-- Dual task completion saves (Task 1 and Task 2 as separate database rows)
-- Survey responses table integration
-- Dynamic task ID discovery in analytics
-- Database constraint mapping (Prompt→'A', Highlight→'B')
-- Color-coded analytics display
-- Comprehensive error handling
+## Analytics Dashboard (user-test-hub)
 
-**Session 10 Continuation - Validation Fixes**:
-- Phase 1: Separate task validation with census data snapshots
-  - Fixed: Both tasks getting same actualSuccess value
-  - Solution: Capture Task 1 data before reset, validate each separately
-- Phase 2: Flexible name/surname validation
-  - Fixed: Validation couldn't find "Heamy" (looking for "Reamy")
-  - Fixed: Required surname "Ockerman" for all family members (only John has it)
-  - Solution: Accept alternate spellings, make surname optional except for John
-- Phase 3: Consistent participant numbering
-  - Fixed: Same participant showing different numbers across analytics sections
-  - Solution: Create stable mapping based on creation order
+- Local only: `cd "/Users/haymcarthur/User Tests/user-test-hub" && npm run dev`
+- Participant numbers: stable, based on `started_at` creation order (oldest = Participant 1)
+- Task names: `A` → "Prompt Method", `B` → "Highlight Method" for `ai-auto-index` test
+- Task IDs discovered dynamically — not hardcoded
 
-**All Issues Resolved**:
-- ✅ Task 1 and Task 2 validated separately against own completion state
-- ✅ Validation handles historical name variations ("Heamy" vs "Reamy")
-- ✅ Validation doesn't require surnames for family members (realistic for historical data)
-- ✅ Participant numbers consistent across all analytics displays
-- ✅ Analytics show accurate success rates for both Prompt and Highlight methods
+---
 
-### Status
-- **ai-auto-index test**: ✅ Fully functional end-to-end
-- **Production deployment**: ✅ Live at https://ai-auto-indexing.vercel.app/
-- **user-test-hub analytics**: ✅ Fully functional with accurate data
-- **Dashboard integration**: ✅ Launch Test button configured for production
-- **Validation**: ✅ Working correctly, tested with real user data
-- **No blocking issues**
+## Current Status (2026-02-20)
 
-### Next Session Focus
-- ✅ **Ready for production user testing** - All bugs resolved
-- Monitor analytics dashboard for test results from new participants
-- Address any new issues discovered during expanded user testing
-- Console logging cleanup (optional - low priority)
-- Deploy user-test-hub dashboard (optional - currently runs locally)
-- New test scenarios or user studies as requested
+### ✅ All Known Bugs Resolved — Actively Collecting Test Data
 
-## Testing Constraints
+**Recent changes this session:**
+- Task instructions rewritten: removed AI-framing, "John Ockerman" bolded, "ACCURATELY" and "ALL" emphasised, AI-makes-mistakes paragraph removed
+- Recording pipeline fixed: Promise-based `stopRecording()`, removed duplicate chunk issue, decoupled DB saves from blob
+- Method B household visibility fixed: Christopher now appears correctly in RecordGroupCard when editing subsequent household members
 
-- **CRITICAL**: Task A and Task B are independent - changes to one must NOT affect the other
-- All Task B work should use `currentApproach === 'B'` checks where needed
-- Test both Task A and Task B flows after any changes
-- Dev server runs on port 3004
+### Production
+- ✅ Live at https://ai-auto-indexing.vercel.app/
+- ✅ Auto-deploys on `git push origin main`
+- ✅ Supabase connected and writing data
+- ✅ Recordings uploading to `test-recordings` storage bucket
+
+### Next Steps
+- Monitor dashboard for new test results
+- Address any new bugs discovered during live testing
+- Optional: console logging cleanup in AddNameInfoSheet.jsx, SelectNameInfoSheet.jsx
