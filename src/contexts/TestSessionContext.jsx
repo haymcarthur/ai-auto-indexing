@@ -88,9 +88,6 @@ export function TestSessionProvider({ children }) {
     // User already sees thank you screen, so they won't retry or refresh
     const saveInBackground = async () => {
       try {
-        // Wait for recording to finalize (resolves when onstop fires, not a blind timeout)
-        const recordingBlob = await recordingBlobPromise;
-
         const isMockSession = sessionId.startsWith('mock-');
 
         if (isMockSession) {
@@ -182,7 +179,11 @@ export function TestSessionProvider({ children }) {
           console.error('❌ Error saving validation data:', error);
         }
 
-        // Upload recording (blob was captured when onstop fired, above)
+        // Await recording blob here — all DB saves above are already done so
+        // even if onstop took a moment, it has had plenty of time to fire.
+        const recordingBlob = await recordingBlobPromise;
+
+        // Upload recording
         let recordingUrl = null;
         if (recordingBlob) {
           try {
