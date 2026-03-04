@@ -24,8 +24,6 @@ export function useScreenRecording() {
     try {
       setError(null);
       setRecordingStopped(false);
-      chunksRef.current = []; // Reset chunks for new recording session
-      recordingBlobRef.current = null; // Reset blob ref
 
       // Request screen capture
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -62,6 +60,10 @@ export function useScreenRecording() {
 
       const combinedStream = new MediaStream(tracks);
       streamRef.current = combinedStream;
+
+      // Permission granted — safe to reset previous recording state now
+      chunksRef.current = [];
+      recordingBlobRef.current = null;
 
       // Create MediaRecorder with VP9 codec at 2.5 Mbps
       const options = {
