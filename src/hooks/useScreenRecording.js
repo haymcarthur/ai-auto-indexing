@@ -68,7 +68,7 @@ export function useScreenRecording() {
       // Create MediaRecorder with VP9 codec at 2.5 Mbps
       const options = {
         mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 2500000 // 2.5 Mbps
+        videoBitsPerSecond: 800000 // 0.8 Mbps — sufficient for screen recordings of UIs
       };
 
       // Fallback to default codec if VP9 is not supported
